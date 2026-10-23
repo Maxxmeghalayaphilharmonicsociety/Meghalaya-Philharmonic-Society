@@ -75,12 +75,37 @@
             100% { transform: translateY(0px); }
         }
         .floating { animation: float 6s ease-in-out infinite; }
+        
+        /* Pulse Animation for Play Button */
+        @keyframes pulse-gold {
+            0% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.4); }
+            70% { box-shadow: 0 0 0 15px rgba(212, 175, 55, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0); }
+        }
+        .pulse-btn { animation: pulse-gold 2s infinite; }
     </style>
 </head>
 <body class="antialiased selection:bg-yellow-600 selection:text-white">
 
+    <!-- FLOATING AUDIO PLAYER -->
+    <div class="fixed bottom-6 right-6 z-50 flex flex-col items-end">
+        <span id="music-tooltip" class="text-[10px] uppercase tracking-widest text-yellow-500 mb-2 mr-2 opacity-80 transition-opacity">Play Symphony</span>
+        <button id="musicToggle" class="glass-panel pulse-btn w-14 h-14 rounded-full border border-yellow-600/50 hover:border-yellow-400 text-yellow-500 flex items-center justify-center transition-all duration-300 z-50" onclick="toggleMusic()">
+            <!-- Play Icon -->
+            <svg id="playIcon" class="w-6 h-6 ml-1" fill="currentColor" viewBox="0 0 20 20"><path d="M4 4l12 6-12 6z"></path></svg>
+            <!-- Pause Icon -->
+            <svg id="pauseIcon" class="w-6 h-6 hidden" fill="currentColor" viewBox="0 0 20 20"><path d="M5 4h3v12H5V4zm7 0h3v12h-3V4z"></path></svg>
+        </button>
+        
+        <!-- The Audio File (Bach Violin Sonata No.1 in G Minor) -->
+        <audio id="bgMusic" loop>
+            <source src="https://upload.wikimedia.org/wikipedia/commons/6/6c/Bach_-_Sonata_1_in_G_minor_-_1._Adagio.ogg" type="audio/ogg">
+            Your browser does not support the audio element.
+        </audio>
+    </div>
+
     <!-- Modern Glass Navigation -->
-    <nav class="fixed w-full z-50 glass-panel border-b-0 border-t-0 border-l-0 border-r-0 border-b border-yellow-900/30 transition-all duration-300">
+    <nav class="fixed w-full z-40 glass-panel border-b-0 border-t-0 border-l-0 border-r-0 border-b border-yellow-900/30 transition-all duration-300">
         <div class="max-w-7xl mx-auto px-6 lg:px-8">
             <div class="flex justify-between items-center h-24">
                 <div class="flex items-center gap-4">
@@ -116,10 +141,10 @@
                 ~ musica est vita ~
             </p>
             
-            <a href="#about" class="group relative inline-flex items-center justify-center px-10 py-4 text-sm tracking-[0.2em] uppercase text-white overflow-hidden rounded-none border border-yellow-600/50 hover:border-yellow-400 transition-colors duration-500 bg-black/40 backdrop-blur-md">
+            <button onclick="toggleMusicAndScroll()" class="group relative inline-flex items-center justify-center px-10 py-4 text-sm tracking-[0.2em] uppercase text-white overflow-hidden rounded-none border border-yellow-600/50 hover:border-yellow-400 transition-colors duration-500 bg-black/40 backdrop-blur-md cursor-pointer">
                 <span class="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-yellow-600/20 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]"></span>
                 <span class="relative">Enter the Concert Hall</span>
-            </a>
+            </button>
         </div>
     </header>
 
@@ -287,8 +312,40 @@
         </div>
     </footer>
 
-    <!-- JS for Modern Carousel -->
+    <!-- Scripts -->
     <script>
+        // --- AUDIO PLAYER LOGIC ---
+        const audio = document.getElementById('bgMusic');
+        const playIcon = document.getElementById('playIcon');
+        const pauseIcon = document.getElementById('pauseIcon');
+        const musicBtn = document.getElementById('musicToggle');
+        const tooltip = document.getElementById('music-tooltip');
+        let isPlaying = false;
+
+        function toggleMusic() {
+            if (isPlaying) {
+                audio.pause();
+                playIcon.classList.remove('hidden');
+                pauseIcon.classList.add('hidden');
+                musicBtn.classList.add('pulse-btn');
+                tooltip.innerText = "Play Symphony";
+            } else {
+                audio.play();
+                playIcon.classList.add('hidden');
+                pauseIcon.classList.remove('hidden');
+                musicBtn.classList.remove('pulse-btn'); // Stop pulsing when playing
+                tooltip.innerText = "Now Playing: Bach";
+            }
+            isPlaying = !isPlaying;
+        }
+
+        // Allow the main "Enter the Concert Hall" button to also start the music
+        function toggleMusicAndScroll() {
+            if (!isPlaying) toggleMusic();
+            document.getElementById('about').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // --- CAROUSEL LOGIC ---
         const items = document.querySelectorAll('.carousel-item');
         const indicators = document.getElementById('indicators').children;
         let currentIndex = 0;
@@ -315,7 +372,6 @@
             updateCarousel(currentIndex);
         }
 
-        // Auto advance every 6 seconds
         setInterval(nextSlide, 6000);
     </script>
 </body>
