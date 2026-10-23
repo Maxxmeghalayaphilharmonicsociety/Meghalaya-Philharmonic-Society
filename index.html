@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meghalaya Philharmonic Society</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Typography & Custom Colors */
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;600&display=swap');
+        
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3, .serif { font-family: 'Playfair Display', serif; }
+        
+        .gold-text { color: #d4af37; }
+        .gold-bg { background-color: #d4af37; }
+        
+        /* Parallax Hero */
+        .parallax {
+            /* Placeholder concert image - replace url if needed */
+            background-image: linear-gradient(rgba(10, 15, 30, 0.7), rgba(10, 15, 30, 0.7)), url('https://images.unsplash.com/photo-1549834125-82d3c48159a3?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80');
+            min-height: 100vh;
+            background-attachment: fixed;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+        }
+
+        /* Simple Carousel Transitions */
+        .slide { display: none; }
+        .slide.active { display: block; animation: fade 1s; }
+        @keyframes fade { from { opacity: .4 } to { opacity: 1 } }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 antialiased overflow-x-hidden">
+
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 bg-slate-900/90 backdrop-blur-sm shadow-lg border-b border-yellow-600/30">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <div class="flex-shrink-0 flex items-center gap-3">
+                    <!-- Top Logo Space -->
+                    <img src="image_d54689.png" alt="MPS Logo" class="h-12 w-12 rounded-full border border-yellow-500 object-cover" onerror="this.src='https://via.placeholder.com/50/d4af37/ffffff?text=MPS'">
+                    <span class="font-bold text-xl text-white serif tracking-wide hidden sm:block">Meghalaya Philharmonic</span>
+                </div>
+                <div class="hidden md:flex space-x-8 text-sm font-medium text-gray-200 uppercase tracking-widest">
+                    <a href="#about" class="hover:text-yellow-500 transition">About</a>
+                    <a href="#objectives" class="hover:text-yellow-500 transition">Objectives</a>
+                    <a href="#gallery" class="hover:text-yellow-500 transition">Gallery</a>
+                    <a href="#team" class="hover:text-yellow-500 transition">Governing Body</a>
+                    <a href="#contact" class="hover:text-yellow-500 transition">Contact</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section (Parallax) -->
+    <header class="parallax flex items-center justify-center text-center px-4">
+        <div class="max-w-4xl mx-auto mt-20">
+            <img src="image_d54689.png" alt="Gold Logo" class="mx-auto h-32 w-32 mb-6 rounded-full shadow-2xl" onerror="this.style.display='none'">
+            <h1 class="text-5xl sm:text-7xl font-bold text-white mb-4 drop-shadow-lg">
+                Meghalaya Philharmonic Society
+            </h1>
+            <p class="text-2xl sm:text-3xl gold-text italic serif mb-10 drop-shadow-md">
+                "musica est vita"
+            </p>
+            <a href="#about" class="gold-bg text-slate-900 hover:bg-yellow-500 transition font-bold py-4 px-10 rounded-full text-lg shadow-[0_0_15px_rgba(212,175,55,0.5)]">
+                Discover Our Music
+            </a>
+        </div>
+    </header>
+
+    <!-- Aims & Objectives -->
+    <section id="objectives" class="py-24 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 class="text-4xl font-bold text-slate-900 serif mb-4">Our Aims & Objectives</h2>
+            <div class="w-24 h-1 gold-bg mx-auto mb-16"></div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 text-left">
+                <div class="p-6 border border-gray-100 rounded-xl shadow-sm hover:shadow-md transition">
+                    <h3 class="text-xl font-bold mb-3 text-slate-800">Promote Local Talent</h3>
+                    <p class="text-gray-600 leading-relaxed">Promoting indigenous local talents in music and instituting awards for outstanding achievements.</p>
+                </div>
+                <div class="p-6 border border-gray-100 rounded-xl shadow-sm hover:shadow-md transition">
+                    <h3 class="text-xl font-bold mb-3 text-slate-800">Global Collaboration</h3>
+                    <p class="text-gray-600 leading-relaxed">Seeking collaboration with leading music studios and schools across the country, including Bollywood and international fame.</p>
+                </div>
+                <div class="p-6 border border-gray-100 rounded-xl shadow-sm hover:shadow-md transition">
+                    <h3 class="text-xl font-bold mb-3 text-slate-800">Music Education</h3>
+                    <p class="text-gray-600 leading-relaxed">Setting up schools for imparting training to talented artists and advancing public education in the art of music.</p>
+                </div>
+                <div class="p-6 border border-gray-100 rounded-xl shadow-sm hover:shadow-md transition">
+                    <h3 class="text-xl font-bold mb-3 text-slate-800">Public Concerts</h3>
+                    <p class="text-gray-600 leading-relaxed">Presenting public concerts, recitals, and providing orchestral entertainment in Meghalaya.</p>
+                </div>
+                <div class="p-6 border border-gray-100 rounded-xl shadow-sm hover:shadow-md transition">
+                    <h3 class="text-xl font-bold mb-3 text-slate-800">Skill Development</h3>
+                    <p class="text-gray-600 leading-relaxed">Organizing and sponsoring training programmes, workshops, conferences, and seminars.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Media Gallery Slideshow -->
+    <section id="gallery" class="py-24 bg-slate-900 text-white">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 text-center">
+            <h2 class="text-4xl font-bold serif mb-4">Gallery</h2>
+            <div class="w-24 h-1 gold-bg mx-auto mb-12"></div>
+            
+            <div class="relative w-full overflow-hidden rounded-2xl shadow-2xl border border-gray-800">
+                <!-- Slides -->
+                <div class="slide active">
+                    <img src="https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?auto=format&fit=crop&w=1200&q=80" alt="Orchestra 1" class="w-full h-[500px] object-cover">
+                </div>
+                <div class="slide">
+                    <img src="https://images.unsplash.com/photo-1465847899084-d164df4dedc6?auto=format&fit=crop&w=1200&q=80" alt="Orchestra 2" class="w-full h-[500px] object-cover">
+                </div>
+                <div class="slide">
+                    <img src="https://images.unsplash.com/photo-1520523839897-bd0b52f945a0?auto=format&fit=crop&w=1200&q=80" alt="Piano" class="w-full h-[500px] object-cover">
+                </div>
+
+                <!-- Navigation Buttons -->
+                <button class="absolute top-1/2 left-4 transform -translate-y-1/2 bg-black/50 text-white p-3 rounded-full hover:bg-yellow-500 transition" onclick="changeSlide(-1)">&#10094;</button>
+                <button class="absolute top-1/2 right-4 transform -translate-y-1/2 bg-black/50 text-white p-3 rounded-full hover:bg-yellow-500 transition" onclick="changeSlide(1)">&#10095;</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Governing Body -->
+    <section id="team" class="py-24 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 text-center">
+            <h2 class="text-4xl font-bold text-slate-900 serif mb-4">Governing Body</h2>
+            <div class="w-24 h-1 gold-bg mx-auto mb-16"></div>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+                <!-- Team Cards -->
+                <div class="bg-white p-6 rounded-xl shadow-sm text-center border-t-4 border-yellow-500">
+                    <h3 class="font-bold text-lg text-slate-900">Lenar Phawa</h3>
+                    <p class="text-yellow-600 text-sm font-medium mt-1">President</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm text-center border-t-4 border-yellow-500">
+                    <h3 class="font-bold text-lg text-slate-900">Dolrich G Momin</h3>
+                    <p class="text-yellow-600 text-sm font-medium mt-1">Vice President</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm text-center border-t-4 border-yellow-500">
+                    <h3 class="font-bold text-lg text-slate-900">Dr. Marc Nongmaithem</h3>
+                    <p class="text-yellow-600 text-sm font-medium mt-1">Secretary</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm text-center border-t-4 border-yellow-500">
+                    <h3 class="font-bold text-lg text-slate-900">A J Momin</h3>
+                    <p class="text-yellow-600 text-sm font-medium mt-1">Treasurer</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm text-center border-t-4 border-yellow-500">
+                    <h3 class="font-bold text-lg text-slate-900">Prof. Aribam Uttam Sharma</h3>
+                    <p class="text-yellow-600 text-sm font-medium mt-1">Advisor</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer & Contact -->
+    <footer id="contact" class="bg-slate-950 text-gray-300 py-16 border-t border-gray-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-10">
+            
+            <div class="text-center md:text-left">
+                <h3 class="text-2xl font-bold text-white serif mb-4">Meghalaya Philharmonic Society</h3>
+                <p class="mb-2">Pamhadem, Panaliar, Jowai</p>
+                <p class="mb-4">West Jaintia Hills District, Meghalaya, JOWAI-793150</p>
+                <p class="mb-1"><strong class="text-white">Phone:</strong> +91 98569 02633 / +91 700520 8297</p>
+                <p><strong class="text-white">Email:</strong> MeghalayaPhilharmonicSociety@gmail.com</p>
+            </div>
+
+            <div class="flex flex-col items-center gap-4">
+                <img src="LOGOFORSTAMP.pdf" alt="Secondary Logo Stamp" class="h-24 opacity-80" onerror="this.style.display='none'">
+                <div class="flex space-x-6 mt-4">
+                    <a href="https://www.youtube.com/@MeghalayaPhilharmonicSociety" target="_blank" class="hover:text-yellow-500 transition">YouTube</a>
+                    <a href="https://www.facebook.com/MeghalayaPhilharmonicSociety" target="_blank" class="hover:text-yellow-500 transition">Facebook</a>
+                </div>
+            </div>
+        </div>
+        <div class="text-center mt-12 pt-8 border-t border-gray-800 text-sm opacity-60">
+            &copy; 2024 Meghalaya Philharmonic Society. All rights reserved.
+        </div>
+    </footer>
+
+    <!-- Slideshow Script -->
+    <script>
+        let slideIndex = 0;
+        const slides = document.querySelectorAll(".slide");
+
+        function showSlide(index) {
+            slides.forEach(slide => slide.classList.remove("active"));
+            if (index >= slides.length) slideIndex = 0;
+            if (index < 0) slideIndex = slides.length - 1;
+            slides[slideIndex].classList.add("active");
+        }
+
+        function changeSlide(n) {
+            slideIndex += n;
+            showSlide(slideIndex);
+        }
+
+        // Auto slide every 5 seconds
+        setInterval(() => {
+            slideIndex++;
+            showSlide(slideIndex);
+        }, 5000);
+    </script>
+</body>
+</html>
