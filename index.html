@@ -95,8 +95,7 @@
       text-align: center;
       padding: 3.5rem 1.5rem 3rem;
       border-bottom: 2px solid var(--gold-dim);
-      background:
-        linear-gradient(180deg, rgba(46, 9, 16, 0.55) 0%, rgba(12, 9, 7, 0.96) 100%);
+      background: linear-gradient(180deg, rgba(46, 9, 16, 0.55) 0%, rgba(12, 9, 7, 0.96) 100%);
       overflow: hidden;
     }
 
@@ -307,12 +306,14 @@
       align-items: center;
     }
     .companion-note {
-      font-size: 0.9rem;
+      font-size: 0.92rem;
       color: var(--parchment-muted);
       margin: 0 0 0.85rem;
+      min-height: 2.75rem;
     }
     .embed-frame {
       width: 100%;
+      height: 394px;
       border: 1px solid var(--gold-dim);
       border-radius: 6px;
       background: #090706;
@@ -339,13 +340,24 @@
     .pill-link:hover { background: var(--velvet-crimson); }
 
     /* BWV Catalog Browser */
+    #categoryTabs {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+    }
     .catalog-controls {
       display: flex;
       gap: 0.75rem;
       flex-wrap: wrap;
-      margin-bottom: 1.1rem;
+      margin-bottom: 1rem;
     }
     .catalog-controls input[type="search"] { flex: 1; min-width: 240px; }
+    #catalogCount {
+      font-size: 0.88rem;
+      color: var(--parchment-muted);
+      margin-bottom: 0.65rem;
+    }
 
     .catalog-list {
       display: grid;
@@ -504,6 +516,13 @@
               <option value="piano-roll">Piano Roll</option>
               <option value="waterfall">Organ Waterfall</option>
             </select>
+            <label for="tempoSelect">Tempo:</label>
+            <select id="tempoSelect">
+              <option value="0.7">70% (Practice)</option>
+              <option value="0.85">85%</option>
+              <option value="1" selected>100% (Original)</option>
+              <option value="1.15">115%</option>
+            </select>
             <button id="stopBtn" class="royal-btn" type="button">Stop</button>
           </div>
         </div>
@@ -516,7 +535,7 @@
 
         <midi-visualizer type="staff" id="bachVisualizer"></midi-visualizer>
 
-        <!-- MOVEMENT II: SYNCHRONIZED COMPANION STAGE -->
+        <!-- SYNCHRONIZED 3-CARD COMPANION STAGE -->
         <div id="companion" class="companion-grid">
 
           <!-- 1. Dynamic Spotify Companion -->
@@ -530,7 +549,6 @@
                 id="spotifyEmbed"
                 class="embed-frame"
                 src="https://open.spotify.com/embed/artist/5aIqB5nVVvmFsvSdExz408?utm_source=generator&theme=0"
-                height="232"
                 frameborder="0"
                 allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
                 loading="lazy">
@@ -548,21 +566,23 @@
             <div>
               <h3><span>MuseScore Edition</span> <span>&#119070;</span></h3>
               <p id="musescoreCaption" class="companion-note">
-                Study the engraved score, fingerings, and barlines alongside MIDI playback.
+                <a href="https://musescore.com/user/11548381/scores/10173982/s/7_gs7O" target="_blank" rel="noopener" style="color:var(--gold-bright);">J. S. Bach 15 2 Part Inventions BWV 772–786</a> by <a href="https://musescore.com/user/11548381" target="_blank" rel="noopener" style="color:var(--parchment);">Marc Nongmaithem</a>
               </p>
               <iframe
-                id="musescoreEmbed"
+                id="score-iframe"
                 class="embed-frame"
-                src="https://musescore.com/user/11548381/scores/embed"
-                height="232"
+                width="100%"
+                height="394"
+                src="https://musescore.com/user/11548381/scores/10173982/embed"
                 frameborder="0"
                 allowfullscreen
+                allow="autoplay; fullscreen"
                 loading="lazy">
               </iframe>
             </div>
             <div class="action-row">
-              <a id="musescoreSearchLink" class="pill-link" href="https://musescore.com/sheetmusic?text=Johann%20Sebastian%20Bach" target="_blank" rel="noopener">
-                Browse BWV Score on MuseScore &nearr;
+              <a id="musescoreSearchLink" class="pill-link" href="https://musescore.com/user/11548381/scores/10173982/s/7_gs7O" target="_blank" rel="noopener">
+                Open Score on MuseScore &nearr;
               </a>
             </div>
           </div>
@@ -578,7 +598,6 @@
                 id="youtubeEmbed"
                 class="embed-frame"
                 src="https://www.youtube.com/embed/1prweT95Mo0"
-                height="232"
                 frameborder="0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowfullscreen
@@ -596,7 +615,7 @@
       </div>
     </section>
 
-   <!-- MOVEMENT III: BWV ARCHIVE INDEX -->
+    <!-- MOVEMENT II: BWV ARCHIVE INDEX -->
     <section id="catalog">
       <div class="movement-header">
         <span class="movement-numeral">Movement II &bull; Bach-Werke-Verzeichnis</span>
@@ -606,7 +625,7 @@
 
       <div class="baroque-frame">
         <!-- Top-Level /midi Folder Category Tabs -->
-        <div id="categoryTabs" style="display:flex; gap:0.5rem; flex-wrap:wrap; margin-bottom:1rem;"></div>
+        <div id="categoryTabs"></div>
 
         <!-- Search + Subfolder Filter -->
         <div class="catalog-controls">
@@ -620,12 +639,12 @@
           </select>
         </div>
 
-        <div id="catalogCount" style="font-size:0.88rem; color:var(--parchment-muted); margin-bottom:0.65rem;"></div>
+        <div id="catalogCount"></div>
         <div id="catalogList" class="catalog-list"></div>
       </div>
     </section>
 
-    <!-- MOVEMENT IV: GOVERNING BODY & MANDATE -->
+    <!-- MOVEMENT III: GOVERNING BODY & MANDATE -->
     <section id="collegium">
       <div class="movement-header">
         <span class="movement-numeral">Movement III &bull; Collegium Musicum</span>
@@ -676,13 +695,14 @@
     const nowBwv = document.getElementById('nowBwv');
     const nowTitle = document.getElementById('nowTitle');
     const vizMode = document.getElementById('vizMode');
+    const tempoSelect = document.getElementById('tempoSelect');
     const stopBtn = document.getElementById('stopBtn');
 
     const spotifyEmbed = document.getElementById('spotifyEmbed');
     const spotifyCaption = document.getElementById('spotifyCaption');
     const spotifySearchLink = document.getElementById('spotifySearchLink');
 
-    const musescoreEmbed = document.getElementById('musescoreEmbed');
+    const musescoreEmbed = document.getElementById('score-iframe');
     const musescoreCaption = document.getElementById('musescoreCaption');
     const musescoreSearchLink = document.getElementById('musescoreSearchLink');
 
@@ -696,12 +716,31 @@
     const catalogCount = document.getElementById('catalogCount');
     const catalogList = document.getElementById('catalogList');
 
+    const DEFAULT_MUSESCORE_EMBED = 'https://musescore.com/user/11548381/scores/10173982/embed';
+    const DEFAULT_MUSESCORE_LINK = 'https://musescore.com/user/11548381/scores/10173982/s/7_gs7O';
+
     let tracks = [];
     let activePath = '';
     let selectedCategory = 'ALL';
+    let baseTempo = null;
 
     vizMode.addEventListener('change', () => {
       midiVisualizer.setAttribute('type', vizMode.value);
+    });
+
+    function applyTempoScale() {
+      if (!baseTempo) baseTempo = midiPlayer.noteSequence?.tempos?.[0]?.qpm || 120;
+      const scale = parseFloat(tempoSelect.value) || 1;
+      if (typeof midiPlayer.setTempo === 'function') {
+        midiPlayer.setTempo(baseTempo * scale);
+      }
+    }
+
+    tempoSelect.addEventListener('change', applyTempoScale);
+
+    midiPlayer.addEventListener('load', () => {
+      baseTempo = midiPlayer.noteSequence?.tempos?.[0]?.qpm || 120;
+      applyTempoScale();
     });
 
     stopBtn.addEventListener('click', () => {
@@ -712,6 +751,7 @@
       const subText = track.subcategory ? ` ${track.subcategory}` : '';
       const searchQuery = encodeURIComponent(`Johann Sebastian Bach ${track.bwv}${subText} ${track.title}`);
 
+      // 1. Spotify Sync
       spotifySearchLink.href = `https://open.spotify.com/search/${searchQuery}`;
       if (track.spotifyUri) {
         spotifyEmbed.src = `https://open.spotify.com/embed/${track.spotifyUri}?utm_source=generator&theme=0`;
@@ -721,15 +761,18 @@
         spotifyCaption.textContent = `Showing J.S. Bach catalog on Spotify — click below to filter directly for ${track.bwv}.`;
       }
 
-      musescoreSearchLink.href = `https://musescore.com/sheetmusic?text=${searchQuery}`;
+      // 2. MuseScore Sync
       if (track.musescoreEmbed) {
         musescoreEmbed.src = track.musescoreEmbed;
-        musescoreCaption.textContent = `Engraved MuseScore edition for ${track.bwv}.`;
+        musescoreSearchLink.href = track.musescoreUrl || `https://musescore.com/sheetmusic?text=${searchQuery}`;
+        musescoreCaption.textContent = `Engraved MuseScore edition for ${track.bwv} — ${track.title}.`;
       } else {
-        musescoreEmbed.src = `https://musescore.com/user/11548381/scores/embed`;
-        musescoreCaption.textContent = `Society MuseScore studio — click below to open ${track.bwv} editions.`;
+        musescoreEmbed.src = DEFAULT_MUSESCORE_EMBED;
+        musescoreSearchLink.href = DEFAULT_MUSESCORE_LINK;
+        musescoreCaption.innerHTML = `<a href="${DEFAULT_MUSESCORE_LINK}" target="_blank" rel="noopener" style="color:var(--gold-bright);">J. S. Bach 15 2 Part Inventions BWV 772–786</a> by <a href="https://musescore.com/user/11548381" target="_blank" rel="noopener" style="color:var(--parchment);">Marc Nongmaithem</a>`;
       }
 
+      // 3. YouTube Sync
       youtubeSearchLink.href = `https://www.youtube.com/results?search_query=${searchQuery}`;
       if (track.youtubeId) {
         youtubeEmbed.src = `https://www.youtube.com/embed/${track.youtubeId}`;
@@ -742,6 +785,7 @@
 
     function selectTrack(track, autoPlay = true) {
       activePath = track.path;
+      baseTempo = null;
       const trail = track.subcategory ? `${track.category} › ${track.subcategory}` : track.category;
       nowBwv.textContent = `${track.bwv} • ${trail}`;
       nowTitle.textContent = track.title;
