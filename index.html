@@ -647,7 +647,7 @@
   <nav class="royal-nav">
     <div class="nav-inner">
       <a href="#top" class="brand-crest">
-        <img id="navLogoImg" src="image_c501d1.jpg" alt="Meghalaya Philharmonic Society Logo" class="nav-logo">
+        <img id="navLogoImg" src="./image_c501d1.jpg" alt="Meghalaya Philharmonic Society Logo" class="nav-logo">
         <span>Meghalaya Philharmonic Society</span>
       </a>
       <div class="nav-links">
@@ -661,7 +661,7 @@
 
   <header id="top" class="cathedral-hero">
     <div class="hero-logo-wrap">
-      <img id="heroLogoImg" src="image_c501d1.jpg" alt="Meghalaya Philharmonic Society Crest" class="hero-logo">
+      <img id="heroLogoImg" src="./image_c501d1.jpg" alt="Meghalaya Philharmonic Society Crest" class="hero-logo">
     </div>
 
     <div class="soli-deo">Soli Deo Gloria &bull; Shillong, Meghalaya</div>
@@ -691,7 +691,7 @@
           <div class="sanctum-actions">
             <div class="voice-control">
               <label for="soundFontSelect">SoundFont:</label>
-              <select id="soundFontSelect" title="Override MIDI file instrument with selected voice">
+              <select id="soundFontSelect" title="Override MIDI file and virtual piano instrument with selected voice">
                 <option value="0" selected>Grand Piano (Locked Default)</option>
                 <option value="6">Clavier (Harpsichord)</option>
                 <option value="42">Cello</option>
@@ -954,6 +954,7 @@
 
     const DEFAULT_MUSESCORE_EMBED = 'https://musescore.com/user/11548381/scores/10173982/embed';
     const DEFAULT_MUSESCORE_LINK = 'https://musescore.com/user/11548381/scores/10173982/s/7_gs7O';
+    const SOUNDFONT_BASE = 'https://storage.googleapis.com/magentadata/js/soundfonts/sgm_plus';
 
     const FALLBACK_LOGO_SVG = 'data:image/svg+xml;utf8,' + encodeURIComponent(
       '<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">' +
@@ -987,7 +988,10 @@
     let totalDuration = 0;
     let pedalEvents = [];
     let liveTimer = null;
-    let manualSynth = null;
+    let keyAuditionPlayer = null;
+    let keyAuditionReady = false;
+    let keyAuditionProgram = -1;
+    let fallbackSynth = null;
     let pendingAutoPlay = false;
 
     function formatTime(sec) {
@@ -1003,17 +1007,67 @@
       return `${NOTE_NAMES[pc]}${octave}`;
     }
 
+    function getSelectedProgram() {
+      const val = parseInt(soundFontSelect.value, 10);
+      return isNaN(val) ? 0 : val;
+    }
+
+    // Plays virtual piano keys using the SAME selected GM instrument program from the dropdown
     async function playManualKey(midi) {
+      const program = getSelectedProgram();
+      try {
+        if (window.Tone && typeof Tone.start === 'function') {
+          await Tone.start();
+        }
+        if (window.mm && typeof window.mm.SoundFontPlayer === 'function') {
+          if (!keyAuditionPlayer || keyAuditionProgram !== program) {
+            keyAuditionReady = false;
+            keyAuditionProgram = program;
+            keyAuditionPlayer = new window.mm.SoundFontPlayer(
+              SOUNDFONT_BASE,
+              undefined,
+              undefined,
+              undefined,
+              {
+                run: (note) => {},
+                stop: () => {}
+              }
+            );
+            await keyAuditionPlayer.loadSamples({
+              notes: [{ pitch: midi, startTime: 0, endTime: 0.4, velocity: 96, program }]
+            });
+            keyAuditionReady = true;
+          }
+          if (keyAuditionReady && keyAuditionPlayer) {
+            keyAuditionPlayer.playNoteDown({ pitch: midi, velocity: 96, program });
+            setTimeout(() => {
+              try {
+                keyAuditionPlayer.playNoteUp({ pitch: midi, velocity: 96, program });
+              } catch (e) {}
+            }, 350);
+            return;
+          }
+        }
+      } catch (e) {}
+
+      // Fallback voice shaped by selected instrument category
       try {
         if (window.Tone) {
-          await Tone.start();
-          if (!manualSynth) {
-            manualSynth = new Tone.PolySynth(Tone.Synth, {
-              oscillator: { type: 'triangle' },
-              envelope: { attack: 0.01, decay: 0.25, sustain: 0.2, release: 0.4 }
-            }).toDestination();
+          if (!fallbackSynth) {
+            fallbackSynth = new Tone.PolySynth(Tone.Synth).toDestination();
           }
-          manualSynth.triggerAttackRelease(midiToNoteName(midi), '8n');
+          const oscMap = {
+            0: 'triangle',
+            6: 'sawtooth',
+            42: 'sawtooth',
+            40: 'sine',
+            73: 'sine'
+          };
+          fallbackSynth.set({
+            oscillator: { type: oscMap[program] || 'triangle' },
+            envelope: { attack: program === 73 ? 0.08 : 0.015, decay: 0.25, sustain: 0.25, release: 0.45 }
+          });
+          fallbackSynth.triggerAttackRelease(midiToNoteName(midi), '8n');
         }
       } catch (e) {}
     }
@@ -1146,29 +1200,34 @@
       return evs;
     }
 
+    // Force every note's GM program & instrument to the selected SoundFont voice (Grand Piano = 0 default)
     function applySelectedSoundFont(forceRestartIfPlaying = false) {
-      const programNum = parseInt(soundFontSelect.value, 10);
+      const programNum = getSelectedProgram();
       const voiceLabel = soundFontSelect.options[soundFontSelect.selectedIndex]?.text || 'Grand Piano';
 
       if (activeTrack) {
         nowBwv.textContent = `${activeTrack.category} • ${activeTrack.bwv} • ${voiceLabel}`;
       }
 
+      // Reset cached audition player so virtual piano keys also switch instrument immediately
+      keyAuditionProgram = -1;
+
       if (!originalSequence) return;
 
       const wasPlaying = forceRestartIfPlaying && Boolean(midiPlayer.playing);
+      const savedTime = midiPlayer.currentTime || 0;
       if (wasPlaying) midiPlayer.stop();
 
       const overridden = JSON.parse(JSON.stringify(originalSequence));
       overridden.notes = (overridden.notes || []).map(n => ({
         ...n,
-        program: isNaN(programNum) ? 0 : programNum,
+        program: programNum,
         instrument: 0
       }));
       if (Array.isArray(overridden.instrumentInfos)) {
         overridden.instrumentInfos = overridden.instrumentInfos.map(info => ({
           ...info,
-          program: isNaN(programNum) ? 0 : programNum
+          program: programNum
         }));
       }
 
@@ -1176,6 +1235,9 @@
 
       if (wasPlaying) {
         applyTempoSlider();
+        if (savedTime > 0 && typeof midiPlayer.seek === 'function') {
+          midiPlayer.seek(savedTime);
+        }
         midiPlayer.start();
       }
     }
@@ -1227,11 +1289,11 @@
 
       if (pendingAutoPlay) {
         pendingAutoPlay = false;
-        Promise.resolve().then(() => {
+        setTimeout(() => {
           try {
             midiPlayer.start();
           } catch (e) {}
-        });
+        }, 40);
       }
     }
 
@@ -1281,7 +1343,11 @@
       youtubeCaption.textContent = `Compare competition MIDI dynamics & pedal phrasing against live piano performances.`;
     }
 
-    function selectTrack(track, autoPlay = true) {
+    async function selectTrack(track, autoPlay = true) {
+      if (window.customElements && typeof window.customElements.whenDefined === 'function') {
+        await window.customElements.whenDefined('midi-player');
+      }
+
       const sameSrc = midiPlayer.getAttribute('src') === track.path && Boolean(midiPlayer.noteSequence);
       activeTrack = track;
       activePath = track.path;
@@ -1306,7 +1372,7 @@
 
       pendingAutoPlay = Boolean(autoPlay);
       originalSequence = null;
-      midiPlayer.setAttribute('src', track.path);
+      midiPlayer.src = track.path;
     }
 
     function renderCatalog() {
@@ -1335,7 +1401,7 @@
 
     async function initArchive() {
       try {
-        const res = await fetch('catalog.json');
+        const res = await fetch('./catalog.json');
         if (!res.ok) throw new Error('Missing catalog.json');
         tracks = await res.json();
       } catch (e) {
@@ -1343,7 +1409,7 @@
       }
 
       if (tracks.length > 0) {
-        selectTrack(tracks[0], false);
+        await selectTrack(tracks[0], false);
       } else {
         nowTitle.textContent = 'No tracks found in catalog.json';
       }
