@@ -243,7 +243,7 @@
       font-family: 'Cinzel', serif;
       font-size: 0.78rem;
       color: var(--gold-bright);
-      min-width: 78px;
+      min-width: 84px;
       text-align: right;
     }
 
@@ -344,6 +344,73 @@
     }
     midi-visualizer svg {
       min-height: 250px;
+    }
+
+    .virtual-piano-wrap {
+      margin-top: 1.1rem;
+      padding: 0.85rem;
+      background: rgba(12, 9, 7, 0.85);
+      border: 1px solid var(--gold-dim);
+      border-radius: 6px;
+    }
+    .virtual-piano-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      font-family: 'Cinzel', serif;
+      font-size: 0.75rem;
+      letter-spacing: 0.12em;
+      color: var(--gold-antique);
+      margin-bottom: 0.6rem;
+    }
+    .piano-scroller {
+      overflow-x: auto;
+      padding-bottom: 0.35rem;
+    }
+    .piano-keyboard {
+      position: relative;
+      display: flex;
+      height: 128px;
+      width: 1196px;
+      user-select: none;
+      border: 2px solid var(--gold-antique);
+      border-radius: 4px;
+      overflow: hidden;
+      background: #140f0c;
+    }
+    .piano-white-key {
+      position: relative;
+      width: 23px;
+      height: 100%;
+      flex: 0 0 23px;
+      background: linear-gradient(180deg, #fbf6ea 0%, #efe3c8 100%);
+      border-right: 1px solid #2b1f16;
+      cursor: pointer;
+      z-index: 1;
+      transition: background 0.05s ease;
+    }
+    .piano-white-key:last-child { border-right: none; }
+    .piano-white-key.active {
+      background: linear-gradient(180deg, #f7d97e 0%, #c59b27 100%);
+      box-shadow: inset 0 -4px 8px rgba(78, 17, 27, 0.35);
+    }
+    .piano-black-key {
+      position: absolute;
+      top: 0;
+      width: 14px;
+      height: 78px;
+      background: linear-gradient(180deg, #2b211b 0%, #120c09 100%);
+      border: 1px solid #090605;
+      border-radius: 0 0 3px 3px;
+      cursor: pointer;
+      z-index: 2;
+      transition: background 0.05s ease;
+    }
+    .piano-black-key.active {
+      background: linear-gradient(180deg, #8b1e31 0%, #4e111b 100%);
+      box-shadow: 0 0 10px rgba(229, 193, 88, 0.55);
     }
 
     .companion-grid {
@@ -615,6 +682,16 @@
 
         <midi-visualizer type="staff" id="bachVisualizer"></midi-visualizer>
 
+        <div class="virtual-piano-wrap">
+          <div class="virtual-piano-header">
+            <span>88-KEY VIRTUAL PIANO (A0 – C8) • CLICK KEYS TO AUDITION</span>
+            <span id="activeNotesReadout">Active Notes: —</span>
+          </div>
+          <div class="piano-scroller">
+            <div id="virtualPiano" class="piano-keyboard" aria-label="88-key interactive virtual piano"></div>
+          </div>
+        </div>
+
         <!-- SYNCHRONIZED 3-CARD COMPANION STAGE -->
         <div id="companion" class="companion-grid">
 
@@ -775,6 +852,9 @@
     const pedalBadge = document.getElementById('pedalBadge');
     const tempoSummary = document.getElementById('tempoSummary');
 
+    const virtualPiano = document.getElementById('virtualPiano');
+    const activeNotesReadout = document.getElementById('activeNotesReadout');
+
     const spotifyEmbed = document.getElementById('spotifyEmbed');
     const spotifyCaption = document.getElementById('spotifyCaption');
     const spotifySearchLink = document.getElementById('spotifySearchLink');
@@ -794,11 +874,116 @@
     const DEFAULT_MUSESCORE_EMBED = 'https://musescore.com/user/11548381/scores/10173982/embed';
     const DEFAULT_MUSESCORE_LINK = 'https://musescore.com/user/11548381/scores/10173982/s/7_gs7O';
 
+    const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+    const BLACK_PITCH_CLASSES = new Set([1, 3, 6, 8, 10]);
+    const keyElementsByMidi = new Map();
+
     let tracks = [];
     let activePath = '';
     let baseTempo = 120;
     let pedalEvents = [];
     let telemetryTimer = null;
+    let pianoTimer = null;
+    let manualSynth = null;
+
+    function midiToNoteName(midi) {
+      const pc = ((midi % 12) + 12) % 12;
+      const octave = Math.floor(midi / 12) - 1;
+      return `${NOTE_NAMES[pc]}${octave}`;
+    }
+
+    async function playManualKey(midi) {
+      try {
+        if (window.Tone) {
+          await Tone.start();
+          if (!manualSynth) {
+            manualSynth = new Tone.PolySynth(Tone.Synth, {
+              oscillator: { type: 'triangle' },
+              envelope: { attack: 0.01, decay: 0.25, sustain: 0.2, release: 0.4 }
+            }).toDestination();
+          }
+          manualSynth.triggerAttackRelease(midiToNoteName(midi), '8n');
+        }
+      } catch (e) {}
+    }
+
+    function buildVirtualPiano() {
+      const WHITE_WIDTH = 23;
+      let whiteIndex = 0;
+
+      for (let midi = 21; midi <= 108; midi++) {
+        const pc = midi % 12;
+        const isBlack = BLACK_PITCH_CLASSES.has(pc);
+
+        if (!isBlack) {
+          const wKey = document.createElement('div');
+          wKey.className = 'piano-white-key';
+          wKey.dataset.midi = midi;
+          wKey.title = midiToNoteName(midi);
+          wKey.addEventListener('pointerdown', () => {
+            wKey.classList.add('active');
+            playManualKey(midi);
+          });
+          wKey.addEventListener('pointerup', () => wKey.classList.remove('active'));
+          wKey.addEventListener('pointerleave', () => wKey.classList.remove('active'));
+          virtualPiano.appendChild(wKey);
+          keyElementsByMidi.set(midi, wKey);
+          whiteIndex++;
+        } else {
+          const bKey = document.createElement('div');
+          bKey.className = 'piano-black-key';
+          bKey.dataset.midi = midi;
+          bKey.title = midiToNoteName(midi);
+          bKey.style.left = `${(whiteIndex * WHITE_WIDTH) - 7}px`;
+          bKey.addEventListener('pointerdown', (ev) => {
+            ev.stopPropagation();
+            bKey.classList.add('active');
+            playManualKey(midi);
+          });
+          bKey.addEventListener('pointerup', (ev) => {
+            ev.stopPropagation();
+            bKey.classList.remove('active');
+          });
+          bKey.addEventListener('pointerleave', () => bKey.classList.remove('active'));
+          virtualPiano.appendChild(bKey);
+          keyElementsByMidi.set(midi, bKey);
+        }
+      }
+    }
+
+    function clearPianoHighlights() {
+      for (const el of keyElementsByMidi.values()) {
+        el.classList.remove('active');
+      }
+      activeNotesReadout.textContent = 'Active Notes: —';
+    }
+
+    function syncVirtualPiano() {
+      const ns = midiPlayer.noteSequence;
+      const t = midiPlayer.currentTime || 0;
+      const activePitches = new Set();
+
+      if (ns && Array.isArray(ns.notes)) {
+        for (const n of ns.notes) {
+          const start = n.startTime ?? 0;
+          const end = n.endTime ?? (start + 0.15);
+          if (t >= start && t <= end) {
+            activePitches.add(n.pitch);
+          }
+        }
+      }
+
+      for (const [midi, el] of keyElementsByMidi.entries()) {
+        el.classList.toggle('active', activePitches.has(midi));
+      }
+
+      if (activePitches.size > 0) {
+        const names = [...activePitches].sort((a, b) => a - b).map(midiToNoteName);
+        activeNotesReadout.textContent = `Active Notes: ${names.join(' ')}`;
+      } else {
+        activeNotesReadout.textContent = 'Active Notes: —';
+      }
+    }
 
     function velocityToDynamic(v) {
       if (v < 35) return 'pp';
@@ -834,14 +1019,13 @@
       pedalBadge.classList.toggle('down', isDown);
     }
 
-    // Build a separated treble (instrument 0 / >= C4) and bass (instrument 1 / < C4) sequence for cleaner grand staff layout
     function buildGrandStaffSequence(ns) {
       const cloned = JSON.parse(JSON.stringify(ns));
       let trebleCount = 0;
       let bassCount = 0;
 
       cloned.notes = (cloned.notes || []).map(n => {
-        const isTreble = n.pitch >= 60; // Middle C (C4) split
+        const isTreble = n.pitch >= 60;
         if (isTreble) trebleCount++;
         else bassCount++;
         return {
@@ -911,6 +1095,8 @@
       applyTempoSlider();
     }
 
+    buildVirtualPiano();
+
     vizMode.addEventListener('change', applyVisualizationMode);
     tempoSlider.addEventListener('input', applyTempoSlider);
     tempoSlider.addEventListener('change', applyTempoSlider);
@@ -919,12 +1105,23 @@
     midiPlayer.addEventListener('start', () => {
       applyTempoSlider();
       clearInterval(telemetryTimer);
+      clearInterval(pianoTimer);
       telemetryTimer = setInterval(updateLivePedalIndicator, 120);
+      pianoTimer = setInterval(syncVirtualPiano, 50);
+    });
+    midiPlayer.addEventListener('pause', () => {
+      clearInterval(telemetryTimer);
+      clearInterval(pianoTimer);
+      pedalBadge.textContent = 'UP';
+      pedalBadge.classList.remove('down');
+      clearPianoHighlights();
     });
     midiPlayer.addEventListener('stop', () => {
       clearInterval(telemetryTimer);
+      clearInterval(pianoTimer);
       pedalBadge.textContent = 'UP';
       pedalBadge.classList.remove('down');
+      clearPianoHighlights();
     });
     stopBtn.addEventListener('click', () => midiPlayer.stop());
 
