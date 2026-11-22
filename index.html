@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Meghalaya Philharmonic Society | Bach Sanctum &amp; Musical Archive</title>
+  <title>Meghalaya Philharmonic Society | Royal Blue Velvet Bach Sanctum</title>
 
   <!-- Baroque Display & Classical Serif Typography -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -15,17 +15,16 @@
 
   <style>
     :root {
-      --bg-obsidian: #0c0907;
-      --bg-mahogany: #17100c;
-      --bg-panel: #1e1510;
-      --velvet-crimson: #4e111b;
-      --velvet-deep: #2e0910;
-      --gold-bright: #e5c158;
+      --bg-velvet-dark: #060b17;
+      --bg-royal-blue: #0d1d40;
+      --bg-panel-blue: #11234d;
+      --velvet-crimson-accent: #4e111b;
+      --gold-bright: #ebd076;
       --gold-antique: #c59b27;
-      --gold-dim: rgba(197, 155, 39, 0.32);
-      --parchment: #f3ead8;
-      --parchment-muted: #c2b49a;
-      --shadow-cathedral: 0 20px 50px rgba(0, 0, 0, 0.78);
+      --gold-dim: rgba(229, 193, 88, 0.34);
+      --parchment: #f5efe2;
+      --parchment-muted: #c8d2e8;
+      --shadow-cathedral: 0 22px 54px rgba(2, 6, 16, 0.85);
     }
 
     * { box-sizing: border-box; }
@@ -33,12 +32,12 @@
 
     body {
       margin: 0;
-      background-color: var(--bg-obsidian);
+      background-color: var(--bg-velvet-dark);
       background-image:
-        radial-gradient(ellipse at 50% 0%, rgba(212, 175, 55, 0.14) 0%, transparent 55%),
-        radial-gradient(circle at 15% 30%, rgba(78, 17, 27, 0.25) 0%, transparent 45%),
-        radial-gradient(circle at 85% 70%, rgba(78, 17, 27, 0.22) 0%, transparent 45%),
-        repeating-linear-gradient(90deg, rgba(255,255,255,0.012) 0px, rgba(255,255,255,0.012) 1px, transparent 1px, transparent 60px);
+        radial-gradient(ellipse at 50% 0%, rgba(229, 193, 88, 0.14) 0%, transparent 55%),
+        radial-gradient(circle at 15% 28%, rgba(28, 63, 138, 0.42) 0%, transparent 48%),
+        radial-gradient(circle at 85% 72%, rgba(16, 38, 92, 0.48) 0%, transparent 50%),
+        repeating-linear-gradient(90deg, rgba(255,255,255,0.014) 0px, rgba(255,255,255,0.014) 1px, transparent 1px, transparent 64px);
       color: var(--parchment);
       font-family: 'EB Garamond', Georgia, serif;
       font-size: 18px;
@@ -49,10 +48,10 @@
       position: sticky;
       top: 0;
       z-index: 100;
-      background: rgba(12, 9, 7, 0.92);
+      background: rgba(6, 11, 23, 0.93);
       backdrop-filter: blur(10px);
       border-bottom: 1px solid var(--gold-dim);
-      padding: 0.75rem 1.5rem;
+      padding: 0.7rem 1.5rem;
     }
     .nav-inner {
       max-width: 1200px;
@@ -64,12 +63,23 @@
       gap: 0.75rem;
     }
     .brand-crest {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.65rem;
       font-family: 'Cinzel Decorative', serif;
       font-weight: 700;
-      font-size: 1.05rem;
+      font-size: 1rem;
       color: var(--gold-bright);
       text-decoration: none;
-      letter-spacing: 0.06em;
+      letter-spacing: 0.05em;
+    }
+    .nav-logo {
+      width: 38px;
+      height: 38px;
+      object-fit: cover;
+      border-radius: 50%;
+      border: 1.5px solid var(--gold-bright);
+      box-shadow: 0 0 12px rgba(229, 193, 88, 0.35);
     }
     .nav-links {
       display: flex;
@@ -92,23 +102,41 @@
       text-align: center;
       padding: 3.5rem 1.5rem 3rem;
       border-bottom: 2px solid var(--gold-dim);
-      background: linear-gradient(180deg, rgba(46, 9, 16, 0.55) 0%, rgba(12, 9, 7, 0.96) 100%);
+      background:
+        linear-gradient(180deg, rgba(10, 23, 54, 0.84) 0%, rgba(6, 11, 23, 0.97) 100%),
+        url("https://images.pexels.com/photos/164938/pexels-photo-164938.jpeg?auto=compress&cs=tinysrgb&w=1600") center/cover no-repeat;
       overflow: hidden;
+    }
+    .hero-logo-wrap {
+      display: inline-block;
+      padding: 5px;
+      border-radius: 50%;
+      border: 2px solid var(--gold-bright);
+      background: rgba(13, 29, 64, 0.9);
+      box-shadow: 0 0 26px rgba(229, 193, 88, 0.28);
+      margin-bottom: 0.85rem;
+    }
+    .hero-logo {
+      display: block;
+      width: 78px;
+      height: 78px;
+      object-fit: cover;
+      border-radius: 50%;
     }
     .organ-pipes {
       display: flex;
       justify-content: center;
       align-items: flex-end;
       gap: 5px;
-      height: 110px;
-      margin: 0 auto 1.5rem;
+      height: 92px;
+      margin: 0 auto 1.25rem;
       max-width: 520px;
       padding-bottom: 8px;
       border-bottom: 3px solid var(--gold-antique);
     }
     .pipe {
       width: 12px;
-      background: linear-gradient(90deg, #7a5c14 0%, #f1d37a 45%, #8a6918 100%);
+      background: linear-gradient(90deg, #876616 0%, #f5da84 45%, #876616 100%);
       border-radius: 6px 6px 1px 1px;
       box-shadow: 0 0 12px rgba(229, 193, 88, 0.25);
       position: relative;
@@ -120,7 +148,7 @@
       left: 2px;
       right: 2px;
       height: 6px;
-      background: #2b1d05;
+      background: #17274d;
       border-radius: 1px;
     }
     .soli-deo {
@@ -129,16 +157,16 @@
       letter-spacing: 0.28em;
       text-transform: uppercase;
       color: var(--gold-antique);
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.45rem;
     }
     h1.palace-title {
       font-family: 'Cinzel Decorative', serif;
-      font-size: clamp(1.9rem, 4.5vw, 3.3rem);
+      font-size: clamp(1.9rem, 4.5vw, 3.25rem);
       font-weight: 900;
-      margin: 0.25rem auto;
+      margin: 0.2rem auto;
       max-width: 900px;
       color: var(--gold-bright);
-      text-shadow: 0 4px 24px rgba(0, 0, 0, 0.9), 0 0 30px rgba(212, 175, 55, 0.25);
+      text-shadow: 0 4px 24px rgba(0, 0, 0, 0.9), 0 0 30px rgba(229, 193, 88, 0.25);
       line-height: 1.2;
     }
     .hero-motto {
@@ -180,9 +208,9 @@
     }
 
     .baroque-frame {
-      background: linear-gradient(160deg, var(--bg-panel) 0%, var(--bg-mahogany) 100%);
+      background: linear-gradient(160deg, var(--bg-panel-blue) 0%, var(--bg-royal-blue) 52%, #09142e 100%);
       border: 1px solid var(--gold-antique);
-      outline: 1px solid rgba(197, 155, 39, 0.22);
+      outline: 1px solid rgba(229, 193, 88, 0.24);
       outline-offset: -7px;
       border-radius: 6px;
       padding: 1.75rem;
@@ -213,12 +241,35 @@
       margin: 0.15rem 0 0;
     }
 
-    input[type="search"], button.royal-btn {
-      background: #120c09;
+    .sanctum-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      flex-wrap: wrap;
+    }
+    .voice-control {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      background: rgba(6, 11, 23, 0.82);
+      border: 1px solid var(--gold-antique);
+      border-radius: 4px;
+      padding: 0.35rem 0.65rem;
+    }
+    .voice-control label {
+      font-family: 'Cinzel', serif;
+      font-size: 0.76rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--parchment-muted);
+    }
+
+    select, input[type="search"], button.royal-btn {
+      background: #081229;
       color: var(--parchment);
       border: 1px solid var(--gold-antique);
       border-radius: 4px;
-      padding: 0.45rem 0.75rem;
+      padding: 0.42rem 0.7rem;
       font-family: 'EB Garamond', serif;
       font-size: 1rem;
     }
@@ -228,20 +279,19 @@
       letter-spacing: 0.1em;
       text-transform: uppercase;
       cursor: pointer;
-      background: linear-gradient(180deg, var(--velvet-crimson), var(--velvet-deep));
+      background: linear-gradient(180deg, #1a3a7a, #0b1938);
       color: var(--gold-bright);
       transition: all 0.2s;
     }
     button.royal-btn:hover {
       border-color: var(--gold-bright);
-      box-shadow: 0 0 14px rgba(212, 175, 55, 0.3);
+      box-shadow: 0 0 14px rgba(229, 193, 88, 0.3);
     }
 
-    /* Compact / Thin Native MIDI Player Bar */
     .compact-player-wrap {
       margin-bottom: 0.9rem;
       padding: 0.2rem 0.5rem;
-      background: rgba(12, 9, 7, 0.72);
+      background: rgba(6, 11, 23, 0.78);
       border: 1px solid var(--gold-dim);
       border-radius: 6px;
     }
@@ -255,10 +305,9 @@
       transform-origin: center;
     }
 
-    /* Integrated Tempo Header + Virtual Piano + Thin Merged Progress Bar */
     .virtual-piano-wrap {
       padding: 0.9rem;
-      background: rgba(12, 9, 7, 0.88);
+      background: rgba(6, 11, 23, 0.88);
       border: 1px solid var(--gold-antique);
       border-radius: 6px;
     }
@@ -290,7 +339,7 @@
       display: inline-flex;
       align-items: center;
       gap: 0.45rem;
-      background: rgba(23, 16, 12, 0.95);
+      background: rgba(17, 35, 77, 0.85);
       border: 1px solid var(--gold-dim);
       border-radius: 4px;
       padding: 0.3rem 0.65rem;
@@ -329,7 +378,7 @@
       border: 2px solid var(--gold-antique);
       border-radius: 4px;
       overflow: hidden;
-      background: #140f0c;
+      background: #091226;
     }
     .piano-keyboard {
       position: relative;
@@ -343,40 +392,39 @@
       width: 23px;
       height: 100%;
       flex: 0 0 23px;
-      background: linear-gradient(180deg, #fbf6ea 0%, #efe3c8 100%);
-      border-right: 1px solid #2b1f16;
+      background: linear-gradient(180deg, #fcf8ee 0%, #ece0c2 100%);
+      border-right: 1px solid #1d2842;
       cursor: pointer;
       z-index: 1;
       transition: background 0.05s ease;
     }
     .piano-white-key:last-child { border-right: none; }
     .piano-white-key.active {
-      background: linear-gradient(180deg, #f7d97e 0%, #c59b27 100%);
-      box-shadow: inset 0 -4px 8px rgba(78, 17, 27, 0.35);
+      background: linear-gradient(180deg, #f9dc7f 0%, #c59b27 100%);
+      box-shadow: inset 0 -4px 8px rgba(13, 29, 64, 0.45);
     }
     .piano-black-key {
       position: absolute;
       top: 0;
       width: 14px;
       height: 80px;
-      background: linear-gradient(180deg, #2b211b 0%, #120c09 100%);
-      border: 1px solid #090605;
+      background: linear-gradient(180deg, #1b2c52 0%, #070e1d 100%);
+      border: 1px solid #040812;
       border-radius: 0 0 3px 3px;
       cursor: pointer;
       z-index: 2;
       transition: background 0.05s ease;
     }
     .piano-black-key.active {
-      background: linear-gradient(180deg, #8b1e31 0%, #4e111b 100%);
-      box-shadow: 0 0 10px rgba(229, 193, 88, 0.55);
+      background: linear-gradient(180deg, #e5c158 0%, #9b7316 100%);
+      box-shadow: 0 0 10px rgba(229, 193, 88, 0.65);
     }
 
-    /* Thin Progress Bar Merged Flush With Bottom of Piano */
     .merged-progress-track {
       position: relative;
       width: 100%;
       height: 5px;
-      background: #1f1610;
+      background: #101e3d;
       border-top: 1px solid var(--gold-antique);
       cursor: pointer;
       overflow: hidden;
@@ -388,14 +436,13 @@
       transition: width 0.06s linear;
     }
 
-    /* Telemetry Strip Placed Below Virtual Piano */
     .piano-telemetry {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
       gap: 0.85rem;
       margin-top: 1rem;
       padding: 0.85rem 1rem;
-      background: rgba(12, 9, 7, 0.78);
+      background: rgba(6, 11, 23, 0.82);
       border: 1px solid var(--gold-dim);
       border-radius: 4px;
     }
@@ -420,23 +467,55 @@
       font-family: 'Cinzel', serif;
       font-size: 0.78rem;
       border: 1px solid var(--gold-dim);
-      background: #17100c;
+      background: #0d1d40;
       color: var(--parchment-muted);
     }
     .pedal-pill.down {
-      background: var(--velvet-crimson);
+      background: var(--velvet-crimson-accent);
       border-color: var(--gold-bright);
       color: var(--gold-bright);
+    }
+
+    .pexels-banner {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+    .pexels-card {
+      position: relative;
+      height: 145px;
+      border-radius: 6px;
+      overflow: hidden;
+      border: 1px solid var(--gold-dim);
+    }
+    .pexels-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      filter: brightness(0.62) contrast(1.08);
+    }
+    .pexels-caption {
+      position: absolute;
+      inset: auto 0 0 0;
+      padding: 0.55rem 0.8rem;
+      background: linear-gradient(180deg, transparent, rgba(6, 11, 23, 0.92));
+      font-family: 'Cinzel', serif;
+      font-size: 0.76rem;
+      letter-spacing: 0.1em;
+      color: var(--gold-bright);
+      text-transform: uppercase;
     }
 
     .companion-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
       gap: 1.5rem;
-      margin-top: 1.75rem;
+      margin-top: 1.5rem;
     }
     .companion-card {
-      background: rgba(12, 9, 7, 0.72);
+      background: rgba(6, 11, 23, 0.78);
       border: 1px solid var(--gold-dim);
       border-radius: 6px;
       padding: 1.15rem;
@@ -466,7 +545,7 @@
       height: 394px;
       border: 1px solid var(--gold-dim);
       border-radius: 6px;
-      background: #090706;
+      background: #060b17;
     }
     .action-row {
       display: flex;
@@ -487,7 +566,7 @@
       border-radius: 4px;
       transition: background 0.2s;
     }
-    .pill-link:hover { background: var(--velvet-crimson); }
+    .pill-link:hover { background: #193773; }
 
     .catalog-controls {
       display: flex;
@@ -515,7 +594,7 @@
       align-items: center;
       gap: 0.75rem;
       padding: 0.75rem 1rem;
-      background: rgba(12, 9, 7, 0.78);
+      background: rgba(6, 11, 23, 0.82);
       border: 1px solid var(--gold-dim);
       border-radius: 4px;
       cursor: pointer;
@@ -523,11 +602,11 @@
     }
     .track-row:hover {
       border-color: var(--gold-bright);
-      background: rgba(78, 17, 27, 0.35);
+      background: rgba(25, 55, 115, 0.45);
     }
     .track-row.active {
       border-color: var(--gold-bright);
-      background: linear-gradient(90deg, rgba(78, 17, 27, 0.75), rgba(23, 16, 12, 0.9));
+      background: linear-gradient(90deg, rgba(29, 66, 140, 0.82), rgba(13, 29, 64, 0.95));
       box-shadow: inset 3px 0 0 var(--gold-bright);
     }
     .track-info {
@@ -541,7 +620,7 @@
       font-weight: 700;
       font-size: 0.85rem;
       color: var(--gold-bright);
-      background: rgba(197, 155, 39, 0.14);
+      background: rgba(229, 193, 88, 0.14);
       border: 1px solid var(--gold-dim);
       padding: 0.1rem 0.5rem;
       border-radius: 3px;
@@ -559,7 +638,7 @@
     }
     .member-card {
       text-align: center;
-      background: rgba(12, 9, 7, 0.78);
+      background: rgba(6, 11, 23, 0.82);
       border: 1px solid var(--gold-dim);
       border-radius: 6px;
       padding: 1.35rem 1rem;
@@ -583,7 +662,7 @@
       text-align: center;
       padding: 2.5rem 1.25rem;
       border-top: 1px solid var(--gold-dim);
-      background: #080605;
+      background: #040710;
       color: var(--parchment-muted);
       font-size: 0.95rem;
     }
@@ -594,7 +673,10 @@
 
   <nav class="royal-nav">
     <div class="nav-inner">
-      <a href="#top" class="brand-crest">Meghalaya Philharmonic Society</a>
+      <a href="#top" class="brand-crest">
+        <img src="image_c501d1.jpg" alt="Meghalaya Philharmonic Society Logo" class="nav-logo">
+        <span>Meghalaya Philharmonic Society</span>
+      </a>
       <div class="nav-links">
         <a href="#sanctum">Competition Piano Sanctum</a>
         <a href="#catalog">J.S. Bach Catalog</a>
@@ -605,32 +687,36 @@
   </nav>
 
   <header id="top" class="cathedral-hero">
+    <div class="hero-logo-wrap">
+      <img src="image_c501d1.jpg" alt="Meghalaya Philharmonic Society Crest" class="hero-logo">
+    </div>
+
     <div class="organ-pipes" aria-hidden="true">
-      <div class="pipe" style="height:36px"></div>
-      <div class="pipe" style="height:48px"></div>
-      <div class="pipe" style="height:64px"></div>
-      <div class="pipe" style="height:82px"></div>
-      <div class="pipe" style="height:98px"></div>
-      <div class="pipe" style="height:108px"></div>
-      <div class="pipe" style="height:98px"></div>
-      <div class="pipe" style="height:82px"></div>
-      <div class="pipe" style="height:64px"></div>
-      <div class="pipe" style="height:48px"></div>
-      <div class="pipe" style="height:36px"></div>
-      <div class="pipe" style="height:54px"></div>
+      <div class="pipe" style="height:32px"></div>
+      <div class="pipe" style="height:44px"></div>
+      <div class="pipe" style="height:58px"></div>
       <div class="pipe" style="height:74px"></div>
-      <div class="pipe" style="height:92px"></div>
-      <div class="pipe" style="height:108px"></div>
-      <div class="pipe" style="height:92px"></div>
+      <div class="pipe" style="height:86px"></div>
+      <div class="pipe" style="height:90px"></div>
+      <div class="pipe" style="height:86px"></div>
       <div class="pipe" style="height:74px"></div>
-      <div class="pipe" style="height:54px"></div>
-      <div class="pipe" style="height:36px"></div>
+      <div class="pipe" style="height:58px"></div>
+      <div class="pipe" style="height:44px"></div>
+      <div class="pipe" style="height:32px"></div>
+      <div class="pipe" style="height:48px"></div>
+      <div class="pipe" style="height:68px"></div>
+      <div class="pipe" style="height:82px"></div>
+      <div class="pipe" style="height:90px"></div>
+      <div class="pipe" style="height:82px"></div>
+      <div class="pipe" style="height:68px"></div>
+      <div class="pipe" style="height:48px"></div>
+      <div class="pipe" style="height:32px"></div>
     </div>
 
     <div class="soli-deo">Soli Deo Gloria &bull; Shillong, Meghalaya</div>
     <h1 class="palace-title">Meghalaya Philharmonic Society</h1>
     <p class="hero-motto">
-      A Baroque sanctuary uniting Johann Sebastian Bach's works with curated competition piano recordings—rich in expressive dynamics and sustain pedal nuance—alongside interactive scores and orchestral training for young musicians in Meghalaya.
+      A Royal Blue Velvet Baroque sanctuary uniting Johann Sebastian Bach's works with competition piano recordings—rich in expressive dynamics and sustain pedal nuance—with selectable SoundFont voices and interactive study tools.
     </p>
   </header>
 
@@ -647,10 +733,23 @@
       <div class="baroque-frame">
         <div class="sanctum-now-playing">
           <div>
-            <div id="nowBwv" class="now-bwv">Johann Sebastian Bach &bull; Competition Piano MIDI</div>
+            <div id="nowBwv" class="now-bwv">Johann Sebastian Bach &bull; Grand Piano Locked</div>
             <h3 id="nowTitle" class="now-title">Select a Piece from the Catalog Below</h3>
           </div>
-          <button id="stopBtn" class="royal-btn" type="button">Stop</button>
+
+          <div class="sanctum-actions">
+            <div class="voice-control">
+              <label for="soundFontSelect">SoundFont:</label>
+              <select id="soundFontSelect" title="Override MIDI file instrument with selected voice">
+                <option value="0" selected>Grand Piano (Locked Default)</option>
+                <option value="6">Clavier (Harpsichord)</option>
+                <option value="42">Cello</option>
+                <option value="40">Violin</option>
+                <option value="73">Flute</option>
+              </select>
+            </div>
+            <button id="stopBtn" class="royal-btn" type="button">Stop</button>
+          </div>
         </div>
 
         <!-- Compact MIDI Player Bar -->
@@ -703,6 +802,22 @@
           <div>
             <span class="telemetry-label">Recorded Tempo &amp; Notes</span>
             <span id="tempoSummary" class="telemetry-value">—</span>
+          </div>
+        </div>
+
+        <!-- Pexels Baroque / Classical Imagery Strip -->
+        <div class="pexels-banner">
+          <div class="pexels-card">
+            <img src="https://images.pexels.com/photos/1246437/pexels-photo-1246437.jpeg?auto=compress&cs=tinysrgb&w=900" alt="Grand piano keyboard in dim studio light">
+            <div class="pexels-caption">Grand Piano &bull; Expressive Touch</div>
+          </div>
+          <div class="pexels-card">
+            <img src="https://images.pexels.com/photos/7095591/pexels-photo-7095591.jpeg?auto=compress&cs=tinysrgb&w=900" alt="Classical sheet music and performance">
+            <div class="pexels-caption">Baroque Counterpoint &bull; Score Study</div>
+          </div>
+          <div class="pexels-card">
+            <img src="https://images.pexels.com/photos/4087996/pexels-photo-4087996.jpeg?auto=compress&cs=tinysrgb&w=900" alt="Strings and orchestral ensemble">
+            <div class="pexels-caption">Chamber &amp; Ensemble &bull; Shillong</div>
           </div>
         </div>
 
@@ -854,6 +969,7 @@
     const midiPlayer = document.getElementById('bachMidiPlayer');
     const nowBwv = document.getElementById('nowBwv');
     const nowTitle = document.getElementById('nowTitle');
+    const soundFontSelect = document.getElementById('soundFontSelect');
     const tempoSlider = document.getElementById('tempoSlider');
     const tempoReadout = document.getElementById('tempoReadout');
     const timeReadout = document.getElementById('timeReadout');
@@ -893,7 +1009,9 @@
     const keyElementsByMidi = new Map();
 
     let tracks = [];
+    let activeTrack = null;
     let activePath = '';
+    let originalSequence = null;
     let baseTempo = 120;
     let totalDuration = 0;
     let pedalEvents = [];
@@ -980,7 +1098,7 @@
     }
 
     function syncProgressAndPiano() {
-      const ns = midiPlayer.noteSequence;
+      const ns = midiPlayer.noteSequence || originalSequence;
       const t = midiPlayer.currentTime || 0;
       const dur = totalDuration || ns?.totalTime || 0;
 
@@ -1056,6 +1174,41 @@
       return evs;
     }
 
+    // Force every note's GM program & instrument to the selected SoundFont voice (Grand Piano = 0 default)
+    function applySelectedSoundFont(forceRestartIfPlaying = false) {
+      const programNum = parseInt(soundFontSelect.value, 10);
+      const voiceLabel = soundFontSelect.options[soundFontSelect.selectedIndex]?.text || 'Grand Piano';
+
+      if (activeTrack) {
+        nowBwv.textContent = `${activeTrack.category} • ${activeTrack.bwv} • ${voiceLabel}`;
+      }
+
+      if (!originalSequence) return;
+
+      const wasPlaying = forceRestartIfPlaying && Boolean(midiPlayer.playing);
+      if (wasPlaying) midiPlayer.stop();
+
+      const overridden = JSON.parse(JSON.stringify(originalSequence));
+      overridden.notes = (overridden.notes || []).map(n => ({
+        ...n,
+        program: isNaN(programNum) ? 0 : programNum,
+        instrument: 0
+      }));
+      if (Array.isArray(overridden.instrumentInfos)) {
+        overridden.instrumentInfos = overridden.instrumentInfos.map(info => ({
+          ...info,
+          program: isNaN(programNum) ? 0 : programNum
+        }));
+      }
+
+      midiPlayer.noteSequence = overridden;
+
+      if (wasPlaying) {
+        applyTempoSlider();
+        midiPlayer.start();
+      }
+    }
+
     function applyTempoSlider() {
       const pct = parseInt(tempoSlider.value, 10) || 100;
       const factor = pct / 100;
@@ -1071,12 +1224,16 @@
     }
 
     function analyzeSequence() {
-      const ns = midiPlayer.noteSequence;
-      if (!ns) return;
+      if (!midiPlayer.noteSequence) return;
 
-      baseTempo = ns.tempos?.[0]?.qpm || 120;
-      totalDuration = ns.totalTime || 0;
-      const notes = ns.notes || [];
+      // Capture raw sequence once per newly loaded track before overriding program
+      if (!originalSequence) {
+        originalSequence = JSON.parse(JSON.stringify(midiPlayer.noteSequence));
+      }
+
+      baseTempo = originalSequence.tempos?.[0]?.qpm || 120;
+      totalDuration = originalSequence.totalTime || 0;
+      const notes = originalSequence.notes || [];
       const velocities = notes.map(n => n.velocity).filter(v => typeof v === 'number' && v > 0);
 
       if (velocities.length > 0) {
@@ -1088,7 +1245,7 @@
         dynamicRange.textContent = 'f–f (vel 102–102, avg 102)';
       }
 
-      pedalEvents = extractPedalEvents(ns);
+      pedalEvents = extractPedalEvents(originalSequence);
       const downCount = pedalEvents.filter(e => e.isDown).length;
       pedalSummary.textContent = pedalEvents.length > 0
         ? `${downCount} sustain presses recorded`
@@ -1098,16 +1255,19 @@
       timeReadout.textContent = `0:00 / ${formatTime(totalDuration)}`;
       mergedProgressFill.style.width = '0%';
 
+      applySelectedSoundFont(false);
       applyTempoSlider();
     }
 
     buildVirtualPiano();
 
+    soundFontSelect.addEventListener('change', () => applySelectedSoundFont(true));
     tempoSlider.addEventListener('input', applyTempoSlider);
     tempoSlider.addEventListener('change', applyTempoSlider);
 
     midiPlayer.addEventListener('load', analyzeSequence);
     midiPlayer.addEventListener('start', () => {
+      applySelectedSoundFont(false);
       applyTempoSlider();
       clearInterval(liveTimer);
       liveTimer = setInterval(syncProgressAndPiano, 50);
@@ -1143,15 +1303,19 @@
     }
 
     function selectTrack(track, autoPlay = true) {
+      activeTrack = track;
       activePath = track.path;
+      originalSequence = null;
       pedalEvents = [];
-      nowBwv.textContent = `${track.category} • ${track.bwv}`;
+      const voiceLabel = soundFontSelect.options[soundFontSelect.selectedIndex]?.text || 'Grand Piano';
+      nowBwv.textContent = `${track.category} • ${track.bwv} • ${voiceLabel}`;
       nowTitle.textContent = track.title;
       midiPlayer.src = track.path;
       syncCompanions(track);
 
       if (autoPlay) {
         midiPlayer.addEventListener('load', () => {
+          applySelectedSoundFont(false);
           applyTempoSlider();
           midiPlayer.start();
         }, { once: true });
