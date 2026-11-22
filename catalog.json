@@ -1,0 +1,29 @@
+[
+  {
+    "bwv": "BWV 1007",
+    "title": "Cello Suite No. 1 in G Major – I. Prélude",
+    "category": "Cello Suites",
+    "path": "midi/cello-suites/BWV1007_Suite_No1_Prelude.mid",
+    "spotifyUri": "track/17i5jLpzndlQhbS4SrTd0B",
+    "musescoreEmbed": "https://musescore.com/user/11548381/scores/embed",
+    "youtubeId": "1prweT95Mo0"
+  },
+  {
+    "bwv": "BWV 565",
+    "title": "Toccata and Fugue in D Minor",
+    "category": "Organ Works",
+    "path": "midi/organ/BWV565_Toccata_and_Fugue_D_Minor.mid",
+    "spotifyUri": "track/4Sx2647N8G87475938475",
+    "musescoreEmbed": "",
+    "youtubeId": "ho9rZjlsyYY"
+  },
+  {
+    "bwv": "BWV Anh. 114",
+    "title": "Minuet in G Major (Notebook for Anna Magdalena Bach)",
+    "category": "Anna Magdalena",
+    "path": "midi/anna-magdalena/BWV_Anh114_Minuet_in_G.mid",
+    "spotifyUri": "track/279087498273498273",
+    "musescoreEmbed": "",
+    "youtubeId": "p1gGxpitLO8"
+  }
+]
