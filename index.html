@@ -74,12 +74,13 @@
       letter-spacing: 0.05em;
     }
     .nav-logo {
-      width: 38px;
-      height: 38px;
+      width: 40px;
+      height: 40px;
       object-fit: cover;
       border-radius: 50%;
       border: 1.5px solid var(--gold-bright);
       box-shadow: 0 0 12px rgba(229, 193, 88, 0.35);
+      background: #0d1d40;
     }
     .nav-links {
       display: flex;
@@ -103,7 +104,7 @@
       padding: 3.5rem 1.5rem 3rem;
       border-bottom: 2px solid var(--gold-dim);
       background:
-        linear-gradient(180deg, rgba(10, 23, 54, 0.84) 0%, rgba(6, 11, 23, 0.97) 100%),
+        linear-gradient(180deg, rgba(10, 23, 54, 0.85) 0%, rgba(6, 11, 23, 0.97) 100%),
         url("https://images.pexels.com/photos/164938/pexels-photo-164938.jpeg?auto=compress&cs=tinysrgb&w=1600") center/cover no-repeat;
       overflow: hidden;
     }
@@ -112,44 +113,16 @@
       padding: 5px;
       border-radius: 50%;
       border: 2px solid var(--gold-bright);
-      background: rgba(13, 29, 64, 0.9);
-      box-shadow: 0 0 26px rgba(229, 193, 88, 0.28);
-      margin-bottom: 0.85rem;
+      background: rgba(13, 29, 64, 0.92);
+      box-shadow: 0 0 26px rgba(229, 193, 88, 0.3);
+      margin-bottom: 0.9rem;
     }
     .hero-logo {
       display: block;
-      width: 78px;
-      height: 78px;
+      width: 84px;
+      height: 84px;
       object-fit: cover;
       border-radius: 50%;
-    }
-    .organ-pipes {
-      display: flex;
-      justify-content: center;
-      align-items: flex-end;
-      gap: 5px;
-      height: 92px;
-      margin: 0 auto 1.25rem;
-      max-width: 520px;
-      padding-bottom: 8px;
-      border-bottom: 3px solid var(--gold-antique);
-    }
-    .pipe {
-      width: 12px;
-      background: linear-gradient(90deg, #876616 0%, #f5da84 45%, #876616 100%);
-      border-radius: 6px 6px 1px 1px;
-      box-shadow: 0 0 12px rgba(229, 193, 88, 0.25);
-      position: relative;
-    }
-    .pipe::after {
-      content: "";
-      position: absolute;
-      bottom: 10px;
-      left: 2px;
-      right: 2px;
-      height: 6px;
-      background: #17274d;
-      border-radius: 1px;
     }
     .soli-deo {
       font-family: 'Cinzel', serif;
@@ -674,7 +647,7 @@
   <nav class="royal-nav">
     <div class="nav-inner">
       <a href="#top" class="brand-crest">
-        <img src="image_c501d1.jpg" alt="Meghalaya Philharmonic Society Logo" class="nav-logo">
+        <img id="navLogoImg" src="image_c501d1.jpg" alt="Meghalaya Philharmonic Society Logo" class="nav-logo">
         <span>Meghalaya Philharmonic Society</span>
       </a>
       <div class="nav-links">
@@ -688,29 +661,7 @@
 
   <header id="top" class="cathedral-hero">
     <div class="hero-logo-wrap">
-      <img src="image_c501d1.jpg" alt="Meghalaya Philharmonic Society Crest" class="hero-logo">
-    </div>
-
-    <div class="organ-pipes" aria-hidden="true">
-      <div class="pipe" style="height:32px"></div>
-      <div class="pipe" style="height:44px"></div>
-      <div class="pipe" style="height:58px"></div>
-      <div class="pipe" style="height:74px"></div>
-      <div class="pipe" style="height:86px"></div>
-      <div class="pipe" style="height:90px"></div>
-      <div class="pipe" style="height:86px"></div>
-      <div class="pipe" style="height:74px"></div>
-      <div class="pipe" style="height:58px"></div>
-      <div class="pipe" style="height:44px"></div>
-      <div class="pipe" style="height:32px"></div>
-      <div class="pipe" style="height:48px"></div>
-      <div class="pipe" style="height:68px"></div>
-      <div class="pipe" style="height:82px"></div>
-      <div class="pipe" style="height:90px"></div>
-      <div class="pipe" style="height:82px"></div>
-      <div class="pipe" style="height:68px"></div>
-      <div class="pipe" style="height:48px"></div>
-      <div class="pipe" style="height:32px"></div>
+      <img id="heroLogoImg" src="image_c501d1.jpg" alt="Meghalaya Philharmonic Society Crest" class="hero-logo">
     </div>
 
     <div class="soli-deo">Soli Deo Gloria &bull; Shillong, Meghalaya</div>
@@ -734,7 +685,7 @@
         <div class="sanctum-now-playing">
           <div>
             <div id="nowBwv" class="now-bwv">Johann Sebastian Bach &bull; Grand Piano Locked</div>
-            <h3 id="nowTitle" class="now-title">Select a Piece from the Catalog Below</h3>
+            <h3 id="nowTitle" class="now-title">Loading Archive...</h3>
           </div>
 
           <div class="sanctum-actions">
@@ -1004,6 +955,26 @@
     const DEFAULT_MUSESCORE_EMBED = 'https://musescore.com/user/11548381/scores/10173982/embed';
     const DEFAULT_MUSESCORE_LINK = 'https://musescore.com/user/11548381/scores/10173982/s/7_gs7O';
 
+    const FALLBACK_LOGO_SVG = 'data:image/svg+xml;utf8,' + encodeURIComponent(
+      '<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">' +
+      '<rect width="120" height="120" rx="60" fill="#0d1d40"/>' +
+      '<circle cx="60" cy="60" r="54" fill="none" stroke="#ebd076" stroke-width="3"/>' +
+      '<text x="60" y="54" text-anchor="middle" fill="#ebd076" font-family="Georgia, serif" font-size="22" font-weight="bold">MPS</text>' +
+      '<text x="60" y="76" text-anchor="middle" fill="#f5efe2" font-family="Georgia, serif" font-size="11">SHILLONG</text>' +
+      '</svg>'
+    );
+
+    ['navLogoImg', 'heroLogoImg'].forEach(id => {
+      const img = document.getElementById(id);
+      if (img) {
+        img.addEventListener('error', () => {
+          if (img.src !== FALLBACK_LOGO_SVG) {
+            img.src = FALLBACK_LOGO_SVG;
+          }
+        });
+      }
+    });
+
     const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
     const BLACK_PITCH_CLASSES = new Set([1, 3, 6, 8, 10]);
     const keyElementsByMidi = new Map();
@@ -1017,6 +988,7 @@
     let pedalEvents = [];
     let liveTimer = null;
     let manualSynth = null;
+    let pendingAutoPlay = false;
 
     function formatTime(sec) {
       if (!sec || !isFinite(sec) || sec < 0) return '0:00';
@@ -1174,7 +1146,6 @@
       return evs;
     }
 
-    // Force every note's GM program & instrument to the selected SoundFont voice (Grand Piano = 0 default)
     function applySelectedSoundFont(forceRestartIfPlaying = false) {
       const programNum = parseInt(soundFontSelect.value, 10);
       const voiceLabel = soundFontSelect.options[soundFontSelect.selectedIndex]?.text || 'Grand Piano';
@@ -1223,14 +1194,10 @@
       }
     }
 
-    function analyzeSequence() {
+    function handleSequenceLoaded() {
       if (!midiPlayer.noteSequence) return;
 
-      // Capture raw sequence once per newly loaded track before overriding program
-      if (!originalSequence) {
-        originalSequence = JSON.parse(JSON.stringify(midiPlayer.noteSequence));
-      }
-
+      originalSequence = JSON.parse(JSON.stringify(midiPlayer.noteSequence));
       baseTempo = originalSequence.tempos?.[0]?.qpm || 120;
       totalDuration = originalSequence.totalTime || 0;
       const notes = originalSequence.notes || [];
@@ -1257,6 +1224,15 @@
 
       applySelectedSoundFont(false);
       applyTempoSlider();
+
+      if (pendingAutoPlay) {
+        pendingAutoPlay = false;
+        Promise.resolve().then(() => {
+          try {
+            midiPlayer.start();
+          } catch (e) {}
+        });
+      }
     }
 
     buildVirtualPiano();
@@ -1265,7 +1241,7 @@
     tempoSlider.addEventListener('input', applyTempoSlider);
     tempoSlider.addEventListener('change', applyTempoSlider);
 
-    midiPlayer.addEventListener('load', analyzeSequence);
+    midiPlayer.addEventListener('load', handleSequenceLoaded);
     midiPlayer.addEventListener('start', () => {
       applySelectedSoundFont(false);
       applyTempoSlider();
@@ -1286,7 +1262,10 @@
       timeReadout.textContent = `0:00 / ${formatTime(totalDuration)}`;
       clearPianoHighlights();
     });
-    stopBtn.addEventListener('click', () => midiPlayer.stop());
+    stopBtn.addEventListener('click', () => {
+      pendingAutoPlay = false;
+      midiPlayer.stop();
+    });
 
     function syncCompanions(track) {
       const q = encodeURIComponent(`Johann Sebastian Bach ${track.bwv} ${track.title} piano`);
@@ -1303,24 +1282,31 @@
     }
 
     function selectTrack(track, autoPlay = true) {
+      const sameSrc = midiPlayer.getAttribute('src') === track.path && Boolean(midiPlayer.noteSequence);
       activeTrack = track;
       activePath = track.path;
-      originalSequence = null;
       pedalEvents = [];
+      clearInterval(liveTimer);
+      clearPianoHighlights();
+
       const voiceLabel = soundFontSelect.options[soundFontSelect.selectedIndex]?.text || 'Grand Piano';
       nowBwv.textContent = `${track.category} • ${track.bwv} • ${voiceLabel}`;
       nowTitle.textContent = track.title;
-      midiPlayer.src = track.path;
       syncCompanions(track);
-
-      if (autoPlay) {
-        midiPlayer.addEventListener('load', () => {
-          applySelectedSoundFont(false);
-          applyTempoSlider();
-          midiPlayer.start();
-        }, { once: true });
-      }
       renderCatalog();
+
+      if (sameSrc) {
+        originalSequence = null;
+        handleSequenceLoaded();
+        if (autoPlay) {
+          try { midiPlayer.start(); } catch (e) {}
+        }
+        return;
+      }
+
+      pendingAutoPlay = Boolean(autoPlay);
+      originalSequence = null;
+      midiPlayer.setAttribute('src', track.path);
     }
 
     function renderCatalog() {
@@ -1358,6 +1344,8 @@
 
       if (tracks.length > 0) {
         selectTrack(tracks[0], false);
+      } else {
+        nowTitle.textContent = 'No tracks found in catalog.json';
       }
       renderCatalog();
     }
