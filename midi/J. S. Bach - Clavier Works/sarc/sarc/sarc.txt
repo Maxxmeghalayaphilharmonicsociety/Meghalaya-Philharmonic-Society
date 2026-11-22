@@ -1,0 +1,44 @@
+
+鈴ちゃんの MIDI ファイルをダウンロードしてくださいましてありがとうございます。
+
+【パッケージ名】
+J.S.バッハ 作曲 サラバンドと変奏ハ長調 BWV990
+
+【ファイルの内容】
+sarc.asx        連続再生ファイル(テキストファイル)
+sarc.txt        説明ファイル
+
+sarc_01.mid     第1曲
+sarc_02.mid     第2曲
+sarc_03.mid     第3曲
+sarc_04.mid     第4曲
+sarc_05.mid     第5曲
+sarc_06.mid     第6曲
+sarc_07.mid     第7曲
+sarc_08.mid     第8曲
+sarc_09.mid     第9曲
+sarc_10.mid     第10曲
+sarc_11.mid     第11曲
+sarc_12.mid     第12曲
+sarc_13.mid     第13曲
+sarc_14.mid     第14曲
+sarc_15.mid     第15曲
+sarc_16.mid     第16曲
+
+【作成日付】
+sarc_01.mid 	2025/03/10
+sarc_02.mid 	2025/03/10
+sarc_03.mid 	2025/03/11
+sarc_04.mid 	2025/03/11
+sarc_05.mid 	2025/03/12
+sarc_06.mid 	2025/03/12
+sarc_07.mid 	2025/03/13
+sarc_08.mid 	2025/03/13
+sarc_09.mid 	2025/03/14
+sarc_10.mid 	2025/03/14
+sarc_11.mid 	2025/03/16
+sarc_12.mid 	2025/03/16
+sarc_13.mid 	2025/03/17
+sarc_14.mid 	2025/03/17
+sarc_15.mid 	2025/03/18
+sarc_16.mid 	2025/03/18
