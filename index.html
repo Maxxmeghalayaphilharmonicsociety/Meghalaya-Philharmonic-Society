@@ -1,378 +1,837 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meghalaya Philharmonic Society</title>
-    <meta name="description" content="The Meghalaya Philharmonic Society promotes indigenous musical talent and advances public music education in Meghalaya.">
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        /* Typography: Baroque Serif + Ultra-Modern Sans */
-        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;800&family=Outfit:wght@300;400;600&display=swap');
-        
-        body { 
-            font-family: 'Outfit', sans-serif; 
-            background-color: #050505;
-            color: #e5e5e5;
-        }
-        h1, h2, h3, .baroque-font { 
-            font-family: 'Cinzel', serif; 
-        }
-        
-        /* Thematic Colors & Effects */
-        .gold-accent { color: #d4af37; }
-        .gold-glow { text-shadow: 0 0 20px rgba(212, 175, 55, 0.4); }
-        
-        /* Ultra-Modern Glassmorphism */
-        .glass-panel {
-            background: rgba(20, 20, 20, 0.6);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(212, 175, 55, 0.15);
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Meghalaya Philharmonic Society | Bach Sanctum &amp; Musical Archive</title>
 
-        /* Hero Parallax with Bach Manuscript Overlay */
-        .hero-section {
-            background-image: 
-                linear-gradient(to bottom, rgba(5, 5, 5, 0.3), #050505),
-                url('https://images.unsplash.com/photo-1507838153414-b4b713384a76?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80');
-            background-attachment: fixed;
-            background-position: center;
-            background-repeat: no-repeat;
-            background-size: cover;
-            position: relative;
-        }
+  <!-- Baroque Display & Classical Serif Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@500;600;700&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
 
-        /* Subtle Sheet Music Texture Overlay */
-        .bach-texture {
-            position: absolute;
-            inset: 0;
-            background-image: url('https://upload.wikimedia.org/wikipedia/commons/4/4b/Bach_Invention_No_1.jpg');
-            opacity: 0.05;
-            mix-blend-mode: screen;
-            pointer-events: none;
-        }
+  <!-- Magenta + html-midi-player Bundle -->
+  <script src="https://cdn.jsdelivr.net/combine/npm/tone@14.7.58,npm/@magenta/music@1.23.1/es6/core.js,npm/focus-visible@5,npm/html-midi-player@1.5.0"></script>
 
-        /* Modern Carousel */
-        .carousel-item {
-            opacity: 0;
-            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-            position: absolute;
-            inset: 0;
-            transform: scale(0.95);
-        }
-        .carousel-item.active {
-            opacity: 1;
-            transform: scale(1);
-            position: relative;
-        }
-        
-        /* Floating Animation */
-        @keyframes float {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-            100% { transform: translateY(0px); }
-        }
-        .floating { animation: float 6s ease-in-out infinite; }
-        
-        /* Pulse Animation for Play Button */
-        @keyframes pulse-gold {
-            0% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.4); }
-            70% { box-shadow: 0 0 0 15px rgba(212, 175, 55, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0); }
-        }
-        .pulse-btn { animation: pulse-gold 2s infinite; }
-    </style>
+  <style>
+    :root {
+      --bg-obsidian: #0c0907;
+      --bg-mahogany: #17100c;
+      --bg-panel: #1e1510;
+      --velvet-crimson: #4e111b;
+      --velvet-deep: #2e0910;
+      --gold-bright: #e5c158;
+      --gold-antique: #c59b27;
+      --gold-dim: rgba(197, 155, 39, 0.32);
+      --parchment: #f3ead8;
+      --parchment-muted: #c2b49a;
+      --shadow-cathedral: 0 20px 50px rgba(0, 0, 0, 0.78);
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      background-color: var(--bg-obsidian);
+      background-image:
+        radial-gradient(ellipse at 50% 0%, rgba(212, 175, 55, 0.14) 0%, transparent 55%),
+        radial-gradient(circle at 15% 30%, rgba(78, 17, 27, 0.25) 0%, transparent 45%),
+        radial-gradient(circle at 85% 70%, rgba(78, 17, 27, 0.22) 0%, transparent 45%),
+        repeating-linear-gradient(90deg, rgba(255,255,255,0.012) 0px, rgba(255,255,255,0.012) 1px, transparent 1px, transparent 60px);
+      color: var(--parchment);
+      font-family: 'EB Garamond', Georgia, serif;
+      font-size: 18px;
+      line-height: 1.65;
+    }
+
+    /* Royal Navigation Bar */
+    nav.royal-nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(12, 9, 7, 0.92);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--gold-dim);
+      padding: 0.75rem 1.5rem;
+    }
+    .nav-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+    .brand-crest {
+      font-family: 'Cinzel Decorative', serif;
+      font-weight: 700;
+      font-size: 1.05rem;
+      color: var(--gold-bright);
+      text-decoration: none;
+      letter-spacing: 0.06em;
+    }
+    .nav-links {
+      display: flex;
+      gap: 1.25rem;
+      flex-wrap: wrap;
+    }
+    .nav-links a {
+      color: var(--parchment-muted);
+      text-decoration: none;
+      font-family: 'Cinzel', serif;
+      font-size: 0.8rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--gold-bright); }
+
+    /* Cathedral Pipe-Organ Hero */
+    header.cathedral-hero {
+      position: relative;
+      text-align: center;
+      padding: 3.5rem 1.5rem 3rem;
+      border-bottom: 2px solid var(--gold-dim);
+      background:
+        linear-gradient(180deg, rgba(46, 9, 16, 0.55) 0%, rgba(12, 9, 7, 0.96) 100%);
+      overflow: hidden;
+    }
+
+    /* CSS Pipe Organ Facade */
+    .organ-pipes {
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      gap: 5px;
+      height: 110px;
+      margin: 0 auto 1.5rem;
+      max-width: 520px;
+      padding-bottom: 8px;
+      border-bottom: 3px solid var(--gold-antique);
+    }
+    .pipe {
+      width: 12px;
+      background: linear-gradient(90deg, #7a5c14 0%, #f1d37a 45%, #8a6918 100%);
+      border-radius: 6px 6px 1px 1px;
+      box-shadow: 0 0 12px rgba(229, 193, 88, 0.25);
+      position: relative;
+    }
+    .pipe::after {
+      content: "";
+      position: absolute;
+      bottom: 10px;
+      left: 2px;
+      right: 2px;
+      height: 6px;
+      background: #2b1d05;
+      border-radius: 1px;
+    }
+
+    .soli-deo {
+      font-family: 'Cinzel', serif;
+      font-size: 0.82rem;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--gold-antique);
+      margin-bottom: 0.5rem;
+    }
+
+    h1.palace-title {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: clamp(1.9rem, 4.5vw, 3.3rem);
+      font-weight: 900;
+      margin: 0.25rem auto;
+      max-width: 900px;
+      color: var(--gold-bright);
+      text-shadow: 0 4px 24px rgba(0, 0, 0, 0.9), 0 0 30px rgba(212, 175, 55, 0.25);
+      line-height: 1.2;
+    }
+
+    .hero-motto {
+      max-width: 720px;
+      margin: 1rem auto 0;
+      font-style: italic;
+      font-size: 1.15rem;
+      color: var(--parchment-muted);
+    }
+
+    /* Main Container */
+    main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2.5rem 1.25rem 5rem;
+    }
+
+    .movement-header {
+      text-align: center;
+      margin: 3rem 0 1.75rem;
+    }
+    .movement-numeral {
+      font-family: 'Cinzel', serif;
+      font-size: 0.85rem;
+      letter-spacing: 0.25em;
+      color: var(--gold-antique);
+      text-transform: uppercase;
+      display: block;
+    }
+    .movement-header h2 {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: clamp(1.4rem, 2.8vw, 2.1rem);
+      color: var(--gold-bright);
+      margin: 0.2rem 0 0.5rem;
+    }
+    .gilded-divider {
+      width: 220px;
+      height: 1px;
+      margin: 0.5rem auto 0;
+      background: linear-gradient(90deg, transparent, var(--gold-antique), transparent);
+    }
+
+    /* Baroque Filigree Frame */
+    .baroque-frame {
+      background: linear-gradient(160deg, var(--bg-panel) 0%, var(--bg-mahogany) 100%);
+      border: 1px solid var(--gold-antique);
+      outline: 1px solid rgba(197, 155, 39, 0.22);
+      outline-offset: -7px;
+      border-radius: 6px;
+      padding: 1.75rem;
+      box-shadow: var(--shadow-cathedral);
+    }
+
+    /* Now Playing Banner */
+    .sanctum-now-playing {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+      padding-bottom: 1rem;
+      margin-bottom: 1.25rem;
+      border-bottom: 1px solid var(--gold-dim);
+    }
+    .now-bwv {
+      font-family: 'Cinzel', serif;
+      font-size: 0.85rem;
+      letter-spacing: 0.16em;
+      color: var(--gold-antique);
+      text-transform: uppercase;
+    }
+    .now-title {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: 1.3rem;
+      color: var(--gold-bright);
+      margin: 0.15rem 0 0;
+    }
+
+    .viz-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+    }
+    .viz-toolbar label {
+      font-family: 'Cinzel', serif;
+      font-size: 0.8rem;
+      letter-spacing: 0.1em;
+      color: var(--parchment-muted);
+    }
+    select, input[type="search"], button.royal-btn {
+      background: #120c09;
+      color: var(--parchment);
+      border: 1px solid var(--gold-antique);
+      border-radius: 4px;
+      padding: 0.5rem 0.85rem;
+      font-family: 'EB Garamond', serif;
+      font-size: 1rem;
+    }
+    button.royal-btn {
+      font-family: 'Cinzel', serif;
+      font-size: 0.8rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      background: linear-gradient(180deg, var(--velvet-crimson), var(--velvet-deep));
+      color: var(--gold-bright);
+      transition: all 0.2s;
+    }
+    button.royal-btn:hover {
+      border-color: var(--gold-bright);
+      box-shadow: 0 0 14px rgba(212, 175, 55, 0.3);
+    }
+
+    /* MIDI Player & Parchment Visualizer */
+    midi-player {
+      width: 100%;
+      display: block;
+      margin-bottom: 1rem;
+    }
+    midi-visualizer {
+      display: block;
+      width: 100%;
+      max-height: 250px;
+      overflow-x: auto;
+      background: #f5ecd8;
+      border: 2px solid var(--gold-antique);
+      border-radius: 4px;
+      box-shadow: inset 0 0 24px rgba(82, 54, 18, 0.25);
+    }
+
+    /* Synchronized 3-Column Companion Grid (Spotify + MuseScore + YouTube) */
+    .companion-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.5rem;
+      margin-top: 1.75rem;
+    }
+    .companion-card {
+      background: rgba(12, 9, 7, 0.72);
+      border: 1px solid var(--gold-dim);
+      border-radius: 6px;
+      padding: 1.15rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .companion-card h3 {
+      font-family: 'Cinzel', serif;
+      font-size: 0.95rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--gold-bright);
+      margin: 0 0 0.35rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .companion-note {
+      font-size: 0.9rem;
+      color: var(--parchment-muted);
+      margin: 0 0 0.85rem;
+    }
+    .embed-frame {
+      width: 100%;
+      border: 1px solid var(--gold-dim);
+      border-radius: 6px;
+      background: #090706;
+    }
+    .action-row {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-top: 0.85rem;
+    }
+    .pill-link {
+      display: inline-block;
+      font-family: 'Cinzel', serif;
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--gold-bright);
+      text-decoration: none;
+      border: 1px solid var(--gold-dim);
+      padding: 0.35rem 0.65rem;
+      border-radius: 4px;
+      transition: background 0.2s;
+    }
+    .pill-link:hover { background: var(--velvet-crimson); }
+
+    /* BWV Catalog Browser */
+    .catalog-controls {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.1rem;
+    }
+    .catalog-controls input[type="search"] { flex: 1; min-width: 240px; }
+
+    .catalog-list {
+      display: grid;
+      gap: 0.55rem;
+      max-height: 440px;
+      overflow-y: auto;
+      padding-right: 0.35rem;
+    }
+    .track-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
+      background: rgba(12, 9, 7, 0.78);
+      border: 1px solid var(--gold-dim);
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.18s;
+    }
+    .track-row:hover {
+      border-color: var(--gold-bright);
+      background: rgba(78, 17, 27, 0.35);
+    }
+    .track-row.active {
+      border-color: var(--gold-bright);
+      background: linear-gradient(90deg, rgba(78, 17, 27, 0.75), rgba(23, 16, 12, 0.9));
+      box-shadow: inset 3px 0 0 var(--gold-bright);
+    }
+    .track-info {
+      display: flex;
+      align-items: baseline;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .bwv-tag {
+      font-family: 'Cinzel', serif;
+      font-weight: 700;
+      font-size: 0.85rem;
+      color: var(--gold-bright);
+      background: rgba(197, 155, 39, 0.14);
+      border: 1px solid var(--gold-dim);
+      padding: 0.1rem 0.5rem;
+      border-radius: 3px;
+    }
+    .cat-label {
+      font-size: 0.85rem;
+      font-style: italic;
+      color: var(--parchment-muted);
+    }
+
+    /* Governing Body & Mission Cards */
+    .board-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 1.25rem;
+    }
+    .member-card {
+      text-align: center;
+      background: rgba(12, 9, 7, 0.78);
+      border: 1px solid var(--gold-dim);
+      border-radius: 6px;
+      padding: 1.35rem 1rem;
+    }
+    .member-role {
+      font-family: 'Cinzel', serif;
+      font-size: 0.75rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--gold-antique);
+      margin-bottom: 0.35rem;
+    }
+    .member-name {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: 1.05rem;
+      color: var(--gold-bright);
+      margin: 0;
+    }
+
+    footer.palace-footer {
+      text-align: center;
+      padding: 2.5rem 1.25rem;
+      border-top: 1px solid var(--gold-dim);
+      background: #080605;
+      color: var(--parchment-muted);
+      font-size: 0.95rem;
+    }
+    footer.palace-footer strong { color: var(--gold-bright); }
+  </style>
 </head>
-<body class="antialiased selection:bg-yellow-600 selection:text-white">
+<body>
 
-    <!-- FLOATING AUDIO PLAYER -->
-    <div class="fixed bottom-6 right-6 z-50 flex flex-col items-end">
-        <span id="music-tooltip" class="text-[10px] uppercase tracking-widest text-yellow-500 mb-2 mr-2 opacity-80 transition-opacity">Play Symphony</span>
-        <button id="musicToggle" class="glass-panel pulse-btn w-14 h-14 rounded-full border border-yellow-600/50 hover:border-yellow-400 text-yellow-500 flex items-center justify-center transition-all duration-300 z-50" onclick="toggleMusic()">
-            <!-- Play Icon -->
-            <svg id="playIcon" class="w-6 h-6 ml-1" fill="currentColor" viewBox="0 0 20 20"><path d="M4 4l12 6-12 6z"></path></svg>
-            <!-- Pause Icon -->
-            <svg id="pauseIcon" class="w-6 h-6 hidden" fill="currentColor" viewBox="0 0 20 20"><path d="M5 4h3v12H5V4zm7 0h3v12h-3V4z"></path></svg>
-        </button>
-        
-        <!-- The Audio File (Bach Violin Sonata No.1 in G Minor) -->
-        <audio id="bgMusic" loop>
-            <source src="https://upload.wikimedia.org/wikipedia/commons/6/6c/Bach_-_Sonata_1_in_G_minor_-_1._Adagio.ogg" type="audio/ogg">
-            Your browser does not support the audio element.
-        </audio>
+  <nav class="royal-nav">
+    <div class="nav-inner">
+      <a href="#top" class="brand-crest">Meghalaya Philharmonic Society</a>
+      <div class="nav-links">
+        <a href="#sanctum">Organ &amp; MIDI Sanctum</a>
+        <a href="#catalog">BWV Catalog</a>
+        <a href="#companion">Scores &amp; Recordings</a>
+        <a href="#collegium">Governing Body</a>
+      </div>
+    </div>
+  </nav>
+
+  <header id="top" class="cathedral-hero">
+    <!-- Decorative Baroque Pipe Organ Crown -->
+    <div class="organ-pipes" aria-hidden="true">
+      <div class="pipe" style="height:36px"></div>
+      <div class="pipe" style="height:48px"></div>
+      <div class="pipe" style="height:64px"></div>
+      <div class="pipe" style="height:82px"></div>
+      <div class="pipe" style="height:98px"></div>
+      <div class="pipe" style="height:108px"></div>
+      <div class="pipe" style="height:98px"></div>
+      <div class="pipe" style="height:82px"></div>
+      <div class="pipe" style="height:64px"></div>
+      <div class="pipe" style="height:48px"></div>
+      <div class="pipe" style="height:36px"></div>
+      <div class="pipe" style="height:54px"></div>
+      <div class="pipe" style="height:74px"></div>
+      <div class="pipe" style="height:92px"></div>
+      <div class="pipe" style="height:108px"></div>
+      <div class="pipe" style="height:92px"></div>
+      <div class="pipe" style="height:74px"></div>
+      <div class="pipe" style="height:54px"></div>
+      <div class="pipe" style="height:36px"></div>
     </div>
 
-    <!-- Modern Glass Navigation -->
-    <nav class="fixed w-full z-40 glass-panel border-b-0 border-t-0 border-l-0 border-r-0 border-b border-yellow-900/30 transition-all duration-300">
-        <div class="max-w-7xl mx-auto px-6 lg:px-8">
-            <div class="flex justify-between items-center h-24">
-                <div class="flex items-center gap-4">
-                    <img src="image_d54689.png" alt="MPS Logo" class="h-14 w-14 rounded-full border border-yellow-700/50 shadow-[0_0_15px_rgba(212,175,55,0.3)] object-cover" onerror="this.src='https://via.placeholder.com/56/d4af37/ffffff?text=MPS'">
-                    <div class="flex flex-col">
-                        <span class="baroque-font font-bold text-xl tracking-widest text-white">MPS</span>
-                    </div>
-                </div>
-                <div class="hidden md:flex space-x-10 text-xs font-semibold tracking-[0.2em] text-gray-400 uppercase">
-                    <a href="#about" class="hover:text-yellow-500 hover:gold-glow transition-all duration-300">Symphony</a>
-                    <a href="#objectives" class="hover:text-yellow-500 hover:gold-glow transition-all duration-300">Movements</a>
-                    <a href="#team" class="hover:text-yellow-500 hover:gold-glow transition-all duration-300">Ensemble</a>
-                    <a href="#contact" class="hover:text-yellow-500 hover:gold-glow transition-all duration-300">Coda</a>
-                </div>
+    <div class="soli-deo">Soli Deo Gloria &bull; Shillong, Meghalaya</div>
+    <h1 class="palace-title">Meghalaya Philharmonic Society</h1>
+    <p class="hero-motto">
+      A Baroque sanctuary uniting the timeless polyphony of Johann Sebastian Bach with modern digital pedagogy, interactive scores, and orchestral training for young musicians across Meghalaya.
+    </p>
+  </header>
+
+  <main>
+
+    <!-- MOVEMENT I: THE ORGAN & MIDI SANCTUM -->
+    <section id="sanctum">
+      <div class="movement-header">
+        <span class="movement-numeral">Movement I &bull; Organum &amp; Clavier</span>
+        <h2>The Johann Sebastian Bach Sanctum</h2>
+        <div class="gilded-divider"></div>
+      </div>
+
+      <div class="baroque-frame">
+        <div class="sanctum-now-playing">
+          <div>
+            <div id="nowBwv" class="now-bwv">BWV Archive Ready</div>
+            <h3 id="nowTitle" class="now-title">Select a Work from the BWV Catalog Below</h3>
+          </div>
+          <div class="viz-toolbar">
+            <label for="vizMode">Notation View:</label>
+            <select id="vizMode">
+              <option value="staff" selected>Grand Staff</option>
+              <option value="piano-roll">Piano Roll</option>
+              <option value="waterfall">Organ Waterfall</option>
+            </select>
+            <button id="stopBtn" class="royal-btn" type="button">Stop</button>
+          </div>
+        </div>
+
+        <midi-player
+          id="bachMidiPlayer"
+          sound-font="https://storage.googleapis.com/magentadata/js/soundfonts/sgm_plus"
+          visualizer="#bachVisualizer">
+        </midi-player>
+
+        <midi-visualizer type="staff" id="bachVisualizer"></midi-visualizer>
+
+        <!-- MOVEMENT II: SYNCHRONIZED COMPANION STAGE -->
+        <div id="companion" class="companion-grid">
+
+          <!-- 1. Dynamic Spotify Companion -->
+          <div class="companion-card">
+            <div>
+              <h3><span>Spotify Recordings</span> <span>&#9835;</span></h3>
+              <p id="spotifyCaption" class="companion-note">
+                Synchronized recordings matching the currently selected BWV work.
+              </p>
+              <iframe
+                id="spotifyEmbed"
+                class="embed-frame"
+                src="https://open.spotify.com/embed/artist/5aIqB5nVVvmFsvSdExz408?utm_source=generator&theme=0"
+                height="232"
+                frameborder="0"
+                allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                loading="lazy">
+              </iframe>
             </div>
-        </div>
-    </nav>
-
-    <!-- Ultra-Modern Hero -->
-    <header class="hero-section min-h-screen flex items-center justify-center pt-20">
-        <div class="bach-texture"></div>
-        <div class="max-w-5xl mx-auto px-6 relative z-10 text-center flex flex-col items-center">
-            
-            <div class="floating mb-8">
-                <img src="image_d54689.png" alt="Gold Logo" class="h-40 w-40 rounded-full shadow-[0_0_40px_rgba(212,175,55,0.4)] border border-yellow-500/50" onerror="this.style.display='none'">
+            <div class="action-row">
+              <a id="spotifySearchLink" class="pill-link" href="https://open.spotify.com/search/Johann%20Sebastian%20Bach" target="_blank" rel="noopener">
+                Open Matching BWV Results in Spotify &nearr;
+              </a>
             </div>
+          </div>
 
-            <h1 class="baroque-font text-5xl md:text-7xl lg:text-8xl font-bold text-transparent bg-clip-text bg-gradient-to-b from-white via-[#fcf6ba] to-[#bf953f] tracking-wide mb-6">
-                Meghalaya<br>Philharmonic Society
-            </h1>
-            
-            <p class="baroque-font text-2xl md:text-3xl gold-accent italic tracking-widest mb-12 opacity-90">
-                ~ musica est vita ~
-            </p>
-            
-            <button onclick="toggleMusicAndScroll()" class="group relative inline-flex items-center justify-center px-10 py-4 text-sm tracking-[0.2em] uppercase text-white overflow-hidden rounded-none border border-yellow-600/50 hover:border-yellow-400 transition-colors duration-500 bg-black/40 backdrop-blur-md cursor-pointer">
-                <span class="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-yellow-600/20 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]"></span>
-                <span class="relative">Enter the Concert Hall</span>
-            </button>
-        </div>
-    </header>
+          <!-- 2. MuseScore Interactive Sheet Music -->
+          <div class="companion-card">
+            <div>
+              <h3><span>MuseScore Edition</span> <span>&#119070;</span></h3>
+              <p id="musescoreCaption" class="companion-note">
+                Study the engraved score, fingerings, and barlines alongside MIDI playback.
+              </p>
+              <iframe
+                id="musescoreEmbed"
+                class="embed-frame"
+                src="https://musescore.com/user/11548381/scores/embed"
+                height="232"
+                frameborder="0"
+                allowfullscreen
+                loading="lazy">
+              </iframe>
+            </div>
+            <div class="action-row">
+              <a id="musescoreSearchLink" class="pill-link" href="https://musescore.com/sheetmusic?text=Johann%20Sebastian%20Bach" target="_blank" rel="noopener">
+                Browse BWV Score on MuseScore &nearr;
+              </a>
+            </div>
+          </div>
 
-    <!-- About Section (The Symphony) -->
-    <section id="about" class="py-32 relative overflow-hidden">
-        <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-yellow-900/10 via-[#050505] to-[#050505]"></div>
-        <div class="max-w-4xl mx-auto px-6 relative z-10 text-center glass-panel p-12 md:p-20 rounded-2xl">
-            <h2 class="baroque-font text-4xl md:text-5xl font-bold mb-8 text-white">The Overture</h2>
-            <div class="w-1 px-12 h-[1px] bg-gradient-to-r from-transparent via-yellow-600 to-transparent mx-auto mb-10"></div>
-            <p class="text-lg md:text-xl leading-relaxed text-gray-300 font-light">
-                Inspired by the profound complexity of the Baroque period and the enduring genius of J.S. Bach, the Meghalaya Philharmonic Society is a modern vessel for classical excellence. We exist to harmonize indigenous local talents with universal musical traditions, orchestrating a cultural renaissance across Meghalaya and beyond.
-            </p>
+          <!-- 3. YouTube Reference Performance / Masterclass -->
+          <div class="companion-card">
+            <div>
+              <h3><span>Performance &amp; Masterclass</span> <span>&#9654;</span></h3>
+              <p id="youtubeCaption" class="companion-note">
+                Reference performance and historical interpretation for students and teachers.
+              </p>
+              <iframe
+                id="youtubeEmbed"
+                class="embed-frame"
+                src="https://www.youtube.com/embed/1prweT95Mo0"
+                height="232"
+                frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen
+                loading="lazy">
+              </iframe>
+            </div>
+            <div class="action-row">
+              <a id="youtubeSearchLink" class="pill-link" href="https://www.youtube.com/results?search_query=Johann+Sebastian+Bach" target="_blank" rel="noopener">
+                More Performances on YouTube &nearr;
+              </a>
+            </div>
+          </div>
+
         </div>
+      </div>
     </section>
 
-    <!-- Objectives Grid (The Movements) -->
-    <section id="objectives" class="py-24">
-        <div class="max-w-7xl mx-auto px-6 lg:px-8">
-            <div class="text-center mb-20">
-                <h2 class="baroque-font text-4xl md:text-5xl font-bold mb-6 text-white">Our Movements</h2>
-                <div class="w-1 px-12 h-[1px] bg-gradient-to-r from-transparent via-yellow-600 to-transparent mx-auto"></div>
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <!-- Card 1 -->
-                <div class="glass-panel p-10 group hover:border-yellow-500/50 transition-colors duration-500 relative overflow-hidden">
-                    <div class="text-5xl baroque-font gold-accent mb-6 opacity-40 group-hover:opacity-100 transition-opacity">I.</div>
-                    <h3 class="text-2xl baroque-font font-bold mb-4 text-white">Virtuosity</h3>
-                    <p class="text-sm leading-relaxed text-gray-400 font-light">Promoting indigenous local talents in music and instituting prestigious awards for outstanding achievements.</p>
-                </div>
-                <!-- Card 2 -->
-                <div class="glass-panel p-10 group hover:border-yellow-500/50 transition-colors duration-500">
-                    <div class="text-5xl baroque-font gold-accent mb-6 opacity-40 group-hover:opacity-100 transition-opacity">II.</div>
-                    <h3 class="text-2xl baroque-font font-bold mb-4 text-white">Harmony</h3>
-                    <p class="text-sm leading-relaxed text-gray-400 font-light">Seeking collaboration with leading music studios and schools across the country, including Bollywood and international stages.</p>
-                </div>
-                <!-- Card 3 -->
-                <div class="glass-panel p-10 group hover:border-yellow-500/50 transition-colors duration-500">
-                    <div class="text-5xl baroque-font gold-accent mb-6 opacity-40 group-hover:opacity-100 transition-opacity">III.</div>
-                    <h3 class="text-2xl baroque-font font-bold mb-4 text-white">Conservatory</h3>
-                    <p class="text-sm leading-relaxed text-gray-400 font-light">Setting up modern schools for imparting training to talented artists, bridging classical theory with contemporary execution.</p>
-                </div>
-                <!-- Card 4 -->
-                <div class="glass-panel p-10 group hover:border-yellow-500/50 transition-colors duration-500">
-                    <div class="text-5xl baroque-font gold-accent mb-6 opacity-40 group-hover:opacity-100 transition-opacity">IV.</div>
-                    <h3 class="text-2xl baroque-font font-bold mb-4 text-white">Performance</h3>
-                    <p class="text-sm leading-relaxed text-gray-400 font-light">Advancing public education and appreciation of music through grand public concerts and recitals.</p>
-                </div>
-                <!-- Card 5 -->
-                <div class="glass-panel p-10 group hover:border-yellow-500/50 transition-colors duration-500">
-                    <div class="text-5xl baroque-font gold-accent mb-6 opacity-40 group-hover:opacity-100 transition-opacity">V.</div>
-                    <h3 class="text-2xl baroque-font font-bold mb-4 text-white">Symphony</h3>
-                    <p class="text-sm leading-relaxed text-gray-400 font-light">Providing premier orchestral and musical entertainment in Meghalaya and creating a thriving musical ecosystem.</p>
-                </div>
-                <!-- Card 6 -->
-                <div class="glass-panel p-10 group hover:border-yellow-500/50 transition-colors duration-500">
-                    <div class="text-5xl baroque-font gold-accent mb-6 opacity-40 group-hover:opacity-100 transition-opacity">VI.</div>
-                    <h3 class="text-2xl baroque-font font-bold mb-4 text-white">Mastery</h3>
-                    <p class="text-sm leading-relaxed text-gray-400 font-light">Organizing and sponsoring intensive training programmes, workshops, conferences, and academic seminars.</p>
-                </div>
-            </div>
+    <!-- MOVEMENT III: BWV ARCHIVE INDEX -->
+    <section id="catalog">
+      <div class="movement-header">
+        <span class="movement-numeral">Movement II &bull; Bach-Werke-Verzeichnis</span>
+        <h2>Complete Searchable MIDI Catalog</h2>
+        <div class="gilded-divider"></div>
+      </div>
+
+      <div class="baroque-frame">
+        <div class="catalog-controls">
+          <input
+            type="search"
+            id="bwvSearch"
+            placeholder="Search by BWV number, key, or title (e.g., BWV 1007, Prelude, Minuet, Toccata)..."
+          >
+          <select id="categorySelect">
+            <option value="ALL">All Repertoire Divisions</option>
+          </select>
         </div>
+
+        <div id="catalogList" class="catalog-list"></div>
+      </div>
     </section>
 
-    <!-- Modern Image Carousel (Visual Opus) -->
-    <section class="py-24 bg-black relative">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6">
-            <div class="relative w-full overflow-hidden rounded-none border border-yellow-900/30 shadow-[0_0_30px_rgba(0,0,0,0.8)] aspect-video bg-[#0a0a0a]">
-                
-                <div id="carousel" class="w-full h-full relative">
-                    <!-- Images -->
-                    <img src="https://images.unsplash.com/photo-1569007604313-9ce7bbab8012?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80" alt="Violin" class="carousel-item active w-full h-full object-cover opacity-80 mix-blend-luminosity hover:mix-blend-normal transition-all duration-1000">
-                    <img src="https://images.unsplash.com/photo-1520523839897-bd0b52f945a0?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80" alt="Piano" class="carousel-item w-full h-full object-cover opacity-80 mix-blend-luminosity hover:mix-blend-normal transition-all duration-1000">
-                    <img src="https://images.unsplash.com/photo-1549834125-82d3c48159a3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80" alt="Concert" class="carousel-item w-full h-full object-cover opacity-80 mix-blend-luminosity hover:mix-blend-normal transition-all duration-1000">
-                </div>
+    <!-- MOVEMENT IV: GOVERNING BODY & MANDATE -->
+    <section id="collegium">
+      <div class="movement-header">
+        <span class="movement-numeral">Movement III &bull; Collegium Musicum</span>
+        <h2>Governing Body &amp; Society Mandate</h2>
+        <div class="gilded-divider"></div>
+      </div>
 
-                <!-- Modern Controls -->
-                <div class="absolute bottom-0 inset-x-0 p-6 bg-gradient-to-t from-black to-transparent flex justify-between items-center z-20">
-                    <button onclick="prevSlide()" class="text-white/50 hover:text-yellow-500 text-sm tracking-[0.2em] uppercase transition-colors">Prev</button>
-                    <div class="flex gap-3" id="indicators">
-                        <div class="w-1.5 h-1.5 rounded-full bg-yellow-500"></div>
-                        <div class="w-1.5 h-1.5 rounded-full bg-white/20"></div>
-                        <div class="w-1.5 h-1.5 rounded-full bg-white/20"></div>
-                    </div>
-                    <button onclick="nextSlide()" class="text-white/50 hover:text-yellow-500 text-sm tracking-[0.2em] uppercase transition-colors">Next</button>
-                </div>
-            </div>
+      <div class="baroque-frame">
+        <p style="text-align:center; max-width:820px; margin:0 auto 2rem; color:var(--parchment);">
+          Founded in Shillong to foster the appreciation, training, and performance of classical, traditional, and orchestral music across Meghalaya, equipping music educators and young talents with open digital scores, MIDI study tools, and ensemble mentorship.
+        </p>
+
+        <div class="board-grid">
+          <div class="member-card">
+            <div class="member-role">President</div>
+            <h3 class="member-name">Lenar Phawa</h3>
+          </div>
+          <div class="member-card">
+            <div class="member-role">Vice President</div>
+            <h3 class="member-name">Dolrich G Momin</h3>
+          </div>
+          <div class="member-card">
+            <div class="member-role">General Secretary</div>
+            <h3 class="member-name">Dr. Marc Nongmaithem</h3>
+          </div>
+          <div class="member-card">
+            <div class="member-role">Treasurer</div>
+            <h3 class="member-name">A J Momin</h3>
+          </div>
+          <div class="member-card">
+            <div class="member-role">Advisor</div>
+            <h3 class="member-name">Prof. Aribam Uttam Sharma</h3>
+          </div>
         </div>
+      </div>
     </section>
 
-    <!-- Governing Body (The Ensemble) -->
-    <section id="team" class="py-32 relative">
-        <div class="max-w-7xl mx-auto px-6 lg:px-8">
-            <div class="text-center mb-20">
-                <h2 class="baroque-font text-4xl md:text-5xl font-bold mb-6 text-white">The Ensemble</h2>
-                <div class="w-1 px-12 h-[1px] bg-gradient-to-r from-transparent via-yellow-600 to-transparent mx-auto"></div>
-                <p class="text-gray-400 mt-6 tracking-widest uppercase text-xs">Governing Body</p>
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                <!-- Profiles -->
-                <div class="glass-panel p-8 text-center hover:-translate-y-2 transition-transform duration-500 border-t-2 border-t-transparent hover:border-t-yellow-600">
-                    <h3 class="baroque-font font-bold text-xl text-white mb-2">Lenar Phawa</h3>
-                    <p class="text-yellow-600/80 text-xs uppercase tracking-widest font-semibold">President</p>
-                </div>
-                <div class="glass-panel p-8 text-center hover:-translate-y-2 transition-transform duration-500 border-t-2 border-t-transparent hover:border-t-yellow-600">
-                    <h3 class="baroque-font font-bold text-xl text-white mb-2">Dolrich G Momin</h3>
-                    <p class="text-yellow-600/80 text-xs uppercase tracking-widest font-semibold">Vice President</p>
-                </div>
-                <div class="glass-panel p-8 text-center hover:-translate-y-2 transition-transform duration-500 border-t-2 border-t-transparent hover:border-t-yellow-600">
-                    <h3 class="baroque-font font-bold text-xl text-white mb-2">Dr. Marc<br>Nongmaithem</h3>
-                    <p class="text-yellow-600/80 text-xs uppercase tracking-widest font-semibold">Secretary</p>
-                </div>
-                <div class="glass-panel p-8 text-center hover:-translate-y-2 transition-transform duration-500 border-t-2 border-t-transparent hover:border-t-yellow-600">
-                    <h3 class="baroque-font font-bold text-xl text-white mb-2">A J Momin</h3>
-                    <p class="text-yellow-600/80 text-xs uppercase tracking-widest font-semibold">Treasurer</p>
-                </div>
-                <div class="glass-panel p-8 text-center hover:-translate-y-2 transition-transform duration-500 border-t-2 border-t-transparent hover:border-t-yellow-600">
-                    <h3 class="baroque-font font-bold text-xl text-white mb-2">Prof. Aribam<br>Uttam Sharma</h3>
-                    <p class="text-yellow-600/80 text-xs uppercase tracking-widest font-semibold">Advisor</p>
-                </div>
-            </div>
+  </main>
+
+  <footer class="palace-footer">
+    <p><strong>Meghalaya Philharmonic Society</strong> &bull; Head Office: B7F NEIGRIHMS, Shillong – 793018, East Khasi Hills District, Meghalaya</p>
+    <p style="font-size:0.85rem; margin-top:0.35rem;">Dedicated to Classical Music Education, Digital Pedagogy &amp; the Works of Johann Sebastian Bach</p>
+  </footer>
+
+  <script>
+    const midiPlayer = document.getElementById('bachMidiPlayer');
+    const midiVisualizer = document.getElementById('bachVisualizer');
+    const nowBwv = document.getElementById('nowBwv');
+    const nowTitle = document.getElementById('nowTitle');
+    const vizMode = document.getElementById('vizMode');
+    const stopBtn = document.getElementById('stopBtn');
+
+    const spotifyEmbed = document.getElementById('spotifyEmbed');
+    const spotifyCaption = document.getElementById('spotifyCaption');
+    const spotifySearchLink = document.getElementById('spotifySearchLink');
+
+    const musescoreEmbed = document.getElementById('musescoreEmbed');
+    const musescoreCaption = document.getElementById('musescoreCaption');
+    const musescoreSearchLink = document.getElementById('musescoreSearchLink');
+
+    const youtubeEmbed = document.getElementById('youtubeEmbed');
+    const youtubeCaption = document.getElementById('youtubeCaption');
+    const youtubeSearchLink = document.getElementById('youtubeSearchLink');
+
+    const bwvSearch = document.getElementById('bwvSearch');
+    const categorySelect = document.getElementById('categorySelect');
+    const catalogList = document.getElementById('catalogList');
+
+    // Built-in signature Bach catalog fallback if catalog.json hasn't been generated yet
+    const FALLBACK_CATALOG = [
+      {
+        bwv: "BWV 1007",
+        title: "Cello Suite No. 1 in G Major – I. Prélude",
+        category: "Cello Suites",
+        path: "midi/cello-suites/BWV1007_Suite_No1_Prelude.mid",
+        spotifyUri: "track/17i5jLpzndlQhbS4SrTd0B",
+        musescoreEmbed: "https://musescore.com/user/11548381/scores/embed",
+        youtubeId: "1prweT95Mo0"
+      },
+      {
+        bwv: "BWV 565",
+        title: "Toccata and Fugue in D Minor",
+        category: "Organ Works",
+        path: "midi/organ/BWV565_Toccata_and_Fugue_D_Minor.mid",
+        spotifyUri: "album/5z6b9W9a2b3c4d5e6f7g8h",
+        youtubeId: "ho9rZjlsyYY"
+      },
+      {
+        bwv: "BWV Anh. 114",
+        title: "Minuet in G Major (Anna Magdalena Bach Notebook)",
+        category: "Anna Magdalena",
+        path: "midi/anna-magdalena/BWV_Anh114_Minuet_in_G.mid",
+        youtubeId: "p1gGxpitLO8"
+      }
+    ];
+
+    let tracks = [];
+    let activePath = '';
+
+    vizMode.addEventListener('change', () => {
+      midiVisualizer.setAttribute('type', vizMode.value);
+    });
+
+    stopBtn.addEventListener('click', () => {
+      midiPlayer.stop();
+    });
+
+    function syncCompanions(track) {
+      const searchQuery = encodeURIComponent(`Johann Sebastian Bach ${track.bwv} ${track.title}`);
+
+      // 1. Spotify Sync
+      spotifySearchLink.href = `https://open.spotify.com/search/${searchQuery}`;
+      if (track.spotifyUri) {
+        spotifyEmbed.src = `https://open.spotify.com/embed/${track.spotifyUri}?utm_source=generator&theme=0`;
+        spotifyCaption.textContent = `Embedded Spotify recording for ${track.bwv} — ${track.title}.`;
+      } else {
+        // Default to J.S. Bach Essential Works embed while updating direct search link for the active BWV
+        spotifyEmbed.src = `https://open.spotify.com/embed/artist/5aIqB5nVVvmFsvSdExz408?utm_source=generator&theme=0`;
+        spotifyCaption.textContent = `Showing J.S. Bach catalog on Spotify — click below to filter directly for ${track.bwv}.`;
+      }
+
+      // 2. MuseScore Sync
+      musescoreSearchLink.href = `https://musescore.com/sheetmusic?text=${searchQuery}`;
+      if (track.musescoreEmbed) {
+        musescoreEmbed.src = track.musescoreEmbed;
+        musescoreCaption.textContent = `Engraved MuseScore edition for ${track.bwv}.`;
+      } else {
+        musescoreEmbed.src = `https://musescore.com/user/11548381/scores/embed`;
+        musescoreCaption.textContent = `Society MuseScore studio — click below to open ${track.bwv} editions.`;
+      }
+
+      // 3. YouTube Sync
+      youtubeSearchLink.href = `https://www.youtube.com/results?search_query=${searchQuery}`;
+      if (track.youtubeId) {
+        youtubeEmbed.src = `https://www.youtube.com/embed/${track.youtubeId}`;
+        youtubeCaption.textContent = `Featured performance of ${track.bwv} — ${track.title}.`;
+      } else {
+        youtubeEmbed.src = `https://www.youtube.com/embed?listType=search&list=${searchQuery}`;
+        youtubeCaption.textContent = `YouTube reference performances for ${track.bwv}.`;
+      }
+    }
+
+    function selectTrack(track, autoPlay = true) {
+      activePath = track.path;
+      nowBwv.textContent = `${track.bwv} • ${track.category}`;
+      nowTitle.textContent = track.title;
+      midiPlayer.src = track.path;
+
+      syncCompanions(track);
+
+      if (autoPlay) {
+        midiPlayer.addEventListener('load', () => midiPlayer.start(), { once: true });
+      }
+      renderCatalog();
+    }
+
+    function renderCatalog() {
+      const q = bwvSearch.value.toLowerCase().trim();
+      const cat = categorySelect.value;
+
+      const filtered = tracks.filter(t => {
+        const matchCat = cat === 'ALL' || t.category === cat;
+        const matchText = !q ||
+          t.bwv.toLowerCase().includes(q) ||
+          t.title.toLowerCase().includes(q) ||
+          t.category.toLowerCase().includes(q);
+        return matchCat && matchText;
+      });
+
+      catalogList.innerHTML = filtered.map((t, i) => `
+        <div class="track-row ${t.path === activePath ? 'active' : ''}" data-idx="${i}">
+          <div class="track-info">
+            <span class="bwv-tag">${t.bwv}</span>
+            <span>${t.title}</span>
+            <span class="cat-label">${t.category}</span>
+          </div>
+          <a class="pill-link" href="${t.path}" download onclick="event.stopPropagation()">.MID</a>
         </div>
-    </section>
+      `).join('');
 
-    <!-- Coda (Footer & Contact) -->
-    <footer id="contact" class="border-t border-yellow-900/30 bg-[#020202] pt-24 pb-12">
-        <div class="max-w-7xl mx-auto px-6 lg:px-8">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
-                
-                <!-- Contact Details -->
-                <div class="text-center md:text-left">
-                    <h3 class="baroque-font text-3xl font-bold text-white mb-6">The Coda</h3>
-                    <div class="space-y-4 text-sm text-gray-400 font-light tracking-wide">
-                        <p class="uppercase text-xs font-semibold text-yellow-600/80 tracking-widest">Headquarters</p>
-                        <p>Pamhadem, Panaliar, Jowai<br>West Jaintia Hills District, Meghalaya<br>JOWAI - 793150</p>
-                        
-                        <div class="pt-6">
-                            <p class="uppercase text-xs font-semibold text-yellow-600/80 tracking-widest mb-2">Communications</p>
-                            <p>+91 98569 02633 <span class="mx-2 text-yellow-600/50">|</span> +91 700520 8297</p>
-                            <p class="mt-1">MeghalayaPhilharmonicSociety@gmail.com</p>
-                        </div>
-                    </div>
-                </div>
+      document.querySelectorAll('.track-row').forEach((el, idx) => {
+        el.addEventListener('click', () => selectTrack(filtered[idx], true));
+      });
+    }
 
-                <!-- Secondary Stamp & Socials -->
-                <div class="flex flex-col items-center md:items-end justify-center">
-                    <div class="p-4 rounded-full border border-yellow-900/30 mb-8 bg-[#050505] shadow-[0_0_20px_rgba(0,0,0,0.5)]">
-                        <!-- We use an object tag for the PDF stamp, with an image fallback -->
-                        <object data="LOGOFORSTAMP.pdf" type="application/pdf" class="h-32 w-32 opacity-70 filter contrast-125 grayscale hover:grayscale-0 transition-all duration-500">
-                            <img src="image_d54689.png" alt="MPS Stamp Fallback" class="h-32 w-32 opacity-70">
-                        </object>
-                    </div>
-                    
-                    <div class="flex space-x-8">
-                        <a href="https://www.youtube.com/@MeghalayaPhilharmonicSociety" target="_blank" class="text-xs uppercase tracking-widest text-gray-500 hover:text-yellow-500 transition-colors duration-300">YouTube</a>
-                        <a href="https://www.facebook.com/MeghalayaPhilharmonicSociety" target="_blank" class="text-xs uppercase tracking-widest text-gray-500 hover:text-yellow-500 transition-colors duration-300">Facebook</a>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="mt-24 pt-8 border-t border-white/5 text-center text-xs tracking-[0.2em] text-gray-600 uppercase">
-                &copy; 2024 Meghalaya Philharmonic Society. All rights reserved.
-            </div>
-        </div>
-    </footer>
+    async function initArchive() {
+      try {
+        const response = await fetch('catalog.json');
+        if (!response.ok) throw new Error('No catalog.json');
+        tracks = await response.json();
+      } catch (e) {
+        tracks = FALLBACK_CATALOG;
+      }
 
-    <!-- Scripts -->
-    <script>
-        // --- AUDIO PLAYER LOGIC ---
-        const audio = document.getElementById('bgMusic');
-        const playIcon = document.getElementById('playIcon');
-        const pauseIcon = document.getElementById('pauseIcon');
-        const musicBtn = document.getElementById('musicToggle');
-        const tooltip = document.getElementById('music-tooltip');
-        let isPlaying = false;
+      const categories = [...new Set(tracks.map(t => t.category))];
+      categories.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c;
+        opt.textContent = c;
+        categorySelect.appendChild(opt);
+      });
 
-        function toggleMusic() {
-            if (isPlaying) {
-                audio.pause();
-                playIcon.classList.remove('hidden');
-                pauseIcon.classList.add('hidden');
-                musicBtn.classList.add('pulse-btn');
-                tooltip.innerText = "Play Symphony";
-            } else {
-                audio.play();
-                playIcon.classList.add('hidden');
-                pauseIcon.classList.remove('hidden');
-                musicBtn.classList.remove('pulse-btn'); // Stop pulsing when playing
-                tooltip.innerText = "Now Playing: Bach";
-            }
-            isPlaying = !isPlaying;
-        }
+      if (tracks.length > 0) {
+        selectTrack(tracks[0], false);
+      }
+      renderCatalog();
+    }
 
-        // Allow the main "Enter the Concert Hall" button to also start the music
-        function toggleMusicAndScroll() {
-            if (!isPlaying) toggleMusic();
-            document.getElementById('about').scrollIntoView({ behavior: 'smooth' });
-        }
-
-        // --- CAROUSEL LOGIC ---
-        const items = document.querySelectorAll('.carousel-item');
-        const indicators = document.getElementById('indicators').children;
-        let currentIndex = 0;
-
-        function updateCarousel(index) {
-            items.forEach((item, i) => {
-                if (i === index) {
-                    item.classList.add('active');
-                    indicators[i].classList.replace('bg-white/20', 'bg-yellow-500');
-                } else {
-                    item.classList.remove('active');
-                    indicators[i].classList.replace('bg-yellow-500', 'bg-white/20');
-                }
-            });
-        }
-
-        function nextSlide() {
-            currentIndex = (currentIndex + 1) % items.length;
-            updateCarousel(currentIndex);
-        }
-
-        function prevSlide() {
-            currentIndex = (currentIndex - 1 + items.length) % items.length;
-            updateCarousel(currentIndex);
-        }
-
-        setInterval(nextSlide, 6000);
-    </script>
+    bwvSearch.addEventListener('input', renderCatalog);
+    categorySelect.addEventListener('change', renderCatalog);
+    initArchive();
+  </script>
 </body>
 </html>
