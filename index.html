@@ -596,7 +596,7 @@
       </div>
     </section>
 
-    <!-- MOVEMENT III: BWV ARCHIVE INDEX -->
+   <!-- MOVEMENT III: BWV ARCHIVE INDEX -->
     <section id="catalog">
       <div class="movement-header">
         <span class="movement-numeral">Movement II &bull; Bach-Werke-Verzeichnis</span>
@@ -605,17 +605,22 @@
       </div>
 
       <div class="baroque-frame">
+        <!-- Top-Level /midi Folder Category Tabs -->
+        <div id="categoryTabs" style="display:flex; gap:0.5rem; flex-wrap:wrap; margin-bottom:1rem;"></div>
+
+        <!-- Search + Subfolder Filter -->
         <div class="catalog-controls">
           <input
             type="search"
             id="bwvSearch"
-            placeholder="Search by BWV number, key, or title (e.g., BWV 1007, Prelude, Minuet, Toccata)..."
+            placeholder="Search by BWV number, key, work, or movement..."
           >
-          <select id="categorySelect">
-            <option value="ALL">All Repertoire Divisions</option>
+          <select id="subcategorySelect">
+            <option value="ALL">All Subcollections / Folders</option>
           </select>
         </div>
 
+        <div id="catalogCount" style="font-size:0.88rem; color:var(--parchment-muted); margin-bottom:0.65rem;"></div>
         <div id="catalogList" class="catalog-list"></div>
       </div>
     </section>
@@ -685,40 +690,15 @@
     const youtubeCaption = document.getElementById('youtubeCaption');
     const youtubeSearchLink = document.getElementById('youtubeSearchLink');
 
+    const categoryTabs = document.getElementById('categoryTabs');
     const bwvSearch = document.getElementById('bwvSearch');
-    const categorySelect = document.getElementById('categorySelect');
+    const subcategorySelect = document.getElementById('subcategorySelect');
+    const catalogCount = document.getElementById('catalogCount');
     const catalogList = document.getElementById('catalogList');
-
-    // Built-in signature Bach catalog fallback if catalog.json hasn't been generated yet
-    const FALLBACK_CATALOG = [
-      {
-        bwv: "BWV 1007",
-        title: "Cello Suite No. 1 in G Major – I. Prélude",
-        category: "Cello Suites",
-        path: "midi/cello-suites/BWV1007_Suite_No1_Prelude.mid",
-        spotifyUri: "track/17i5jLpzndlQhbS4SrTd0B",
-        musescoreEmbed: "https://musescore.com/user/11548381/scores/embed",
-        youtubeId: "1prweT95Mo0"
-      },
-      {
-        bwv: "BWV 565",
-        title: "Toccata and Fugue in D Minor",
-        category: "Organ Works",
-        path: "midi/organ/BWV565_Toccata_and_Fugue_D_Minor.mid",
-        spotifyUri: "album/5z6b9W9a2b3c4d5e6f7g8h",
-        youtubeId: "ho9rZjlsyYY"
-      },
-      {
-        bwv: "BWV Anh. 114",
-        title: "Minuet in G Major (Anna Magdalena Bach Notebook)",
-        category: "Anna Magdalena",
-        path: "midi/anna-magdalena/BWV_Anh114_Minuet_in_G.mid",
-        youtubeId: "p1gGxpitLO8"
-      }
-    ];
 
     let tracks = [];
     let activePath = '';
+    let selectedCategory = 'ALL';
 
     vizMode.addEventListener('change', () => {
       midiVisualizer.setAttribute('type', vizMode.value);
@@ -729,20 +709,18 @@
     });
 
     function syncCompanions(track) {
-      const searchQuery = encodeURIComponent(`Johann Sebastian Bach ${track.bwv} ${track.title}`);
+      const subText = track.subcategory ? ` ${track.subcategory}` : '';
+      const searchQuery = encodeURIComponent(`Johann Sebastian Bach ${track.bwv}${subText} ${track.title}`);
 
-      // 1. Spotify Sync
       spotifySearchLink.href = `https://open.spotify.com/search/${searchQuery}`;
       if (track.spotifyUri) {
         spotifyEmbed.src = `https://open.spotify.com/embed/${track.spotifyUri}?utm_source=generator&theme=0`;
         spotifyCaption.textContent = `Embedded Spotify recording for ${track.bwv} — ${track.title}.`;
       } else {
-        // Default to J.S. Bach Essential Works embed while updating direct search link for the active BWV
         spotifyEmbed.src = `https://open.spotify.com/embed/artist/5aIqB5nVVvmFsvSdExz408?utm_source=generator&theme=0`;
         spotifyCaption.textContent = `Showing J.S. Bach catalog on Spotify — click below to filter directly for ${track.bwv}.`;
       }
 
-      // 2. MuseScore Sync
       musescoreSearchLink.href = `https://musescore.com/sheetmusic?text=${searchQuery}`;
       if (track.musescoreEmbed) {
         musescoreEmbed.src = track.musescoreEmbed;
@@ -752,7 +730,6 @@
         musescoreCaption.textContent = `Society MuseScore studio — click below to open ${track.bwv} editions.`;
       }
 
-      // 3. YouTube Sync
       youtubeSearchLink.href = `https://www.youtube.com/results?search_query=${searchQuery}`;
       if (track.youtubeId) {
         youtubeEmbed.src = `https://www.youtube.com/embed/${track.youtubeId}`;
@@ -765,7 +742,8 @@
 
     function selectTrack(track, autoPlay = true) {
       activePath = track.path;
-      nowBwv.textContent = `${track.bwv} • ${track.category}`;
+      const trail = track.subcategory ? `${track.category} › ${track.subcategory}` : track.category;
+      nowBwv.textContent = `${track.bwv} • ${trail}`;
       nowTitle.textContent = track.title;
       midiPlayer.src = track.path;
 
@@ -777,29 +755,84 @@
       renderCatalog();
     }
 
+    function populateSubcategories() {
+      const prev = subcategorySelect.value;
+      const pool = selectedCategory === 'ALL'
+        ? tracks
+        : tracks.filter(t => t.category === selectedCategory);
+
+      const subs = [...new Set(pool.map(t => t.subcategory).filter(Boolean))].sort();
+      subcategorySelect.innerHTML = `<option value="ALL">All Subcollections (${subs.length || 'None'})</option>`;
+      subs.forEach(s => {
+        const opt = document.createElement('option');
+        opt.value = s;
+        opt.textContent = s;
+        subcategorySelect.appendChild(opt);
+      });
+      if (subs.includes(prev)) subcategorySelect.value = prev;
+    }
+
+    function renderCategoryTabs() {
+      const counts = tracks.reduce((acc, t) => {
+        acc[t.category] = (acc[t.category] || 0) + 1;
+        return acc;
+      }, {});
+      const cats = Object.keys(counts).sort();
+
+      const allButtons = [
+        { key: 'ALL', label: `All Divisions (${tracks.length})` },
+        ...cats.map(c => ({ key: c, label: `${c} (${counts[c]})` }))
+      ];
+
+      categoryTabs.innerHTML = allButtons.map(b => `
+        <button
+          type="button"
+          class="royal-btn"
+          data-cat="${b.key}"
+          style="${selectedCategory === b.key ? 'border-color:var(--gold-bright); box-shadow:0 0 12px rgba(212,175,55,0.4);' : 'opacity:0.78;'}"
+        >${b.label}</button>
+      `).join('');
+
+      categoryTabs.querySelectorAll('button').forEach(btn => {
+        btn.addEventListener('click', () => {
+          selectedCategory = btn.getAttribute('data-cat');
+          renderCategoryTabs();
+          populateSubcategories();
+          renderCatalog();
+        });
+      });
+    }
+
     function renderCatalog() {
       const q = bwvSearch.value.toLowerCase().trim();
-      const cat = categorySelect.value;
+      const sub = subcategorySelect.value;
 
       const filtered = tracks.filter(t => {
-        const matchCat = cat === 'ALL' || t.category === cat;
+        const matchCat = selectedCategory === 'ALL' || t.category === selectedCategory;
+        const matchSub = sub === 'ALL' || t.subcategory === sub;
         const matchText = !q ||
           t.bwv.toLowerCase().includes(q) ||
           t.title.toLowerCase().includes(q) ||
-          t.category.toLowerCase().includes(q);
-        return matchCat && matchText;
+          t.category.toLowerCase().includes(q) ||
+          (t.subcategory && t.subcategory.toLowerCase().includes(q));
+        return matchCat && matchSub && matchText;
       });
 
-      catalogList.innerHTML = filtered.map((t, i) => `
-        <div class="track-row ${t.path === activePath ? 'active' : ''}" data-idx="${i}">
-          <div class="track-info">
-            <span class="bwv-tag">${t.bwv}</span>
-            <span>${t.title}</span>
-            <span class="cat-label">${t.category}</span>
+      catalogCount.textContent = `Showing ${filtered.length} of ${tracks.length} cataloged works`;
+
+      catalogList.innerHTML = filtered.map((t, i) => {
+        const folderCrumb = t.subcategory ? `${t.category} &rsaquo; ${t.subcategory}` : t.category;
+        return `
+          <div class="track-row ${t.path === activePath ? 'active' : ''}" data-idx="${i}">
+            <div class="track-info">
+              <span class="bwv-tag">${t.bwv}</span>
+              <span>${t.title}</span>
+              <span class="cat-label">${folderCrumb}</span>
+            </div>
+            <a class="pill-link" href="${t.path}" download onclick="event.stopPropagation()">.MID</a>
           </div>
-          <a class="pill-link" href="${t.path}" download onclick="event.stopPropagation()">.MID</a>
-        </div>
-      `).join('');
+        `;
+      }).join('');
 
       document.querySelectorAll('.track-row').forEach((el, idx) => {
         el.addEventListener('click', () => selectTrack(filtered[idx], true));
@@ -812,16 +845,11 @@
         if (!response.ok) throw new Error('No catalog.json');
         tracks = await response.json();
       } catch (e) {
-        tracks = FALLBACK_CATALOG;
+        tracks = [];
       }
 
-      const categories = [...new Set(tracks.map(t => t.category))];
-      categories.forEach(c => {
-        const opt = document.createElement('option');
-        opt.value = c;
-        opt.textContent = c;
-        categorySelect.appendChild(opt);
-      });
+      renderCategoryTabs();
+      populateSubcategories();
 
       if (tracks.length > 0) {
         selectTrack(tracks[0], false);
@@ -830,7 +858,7 @@
     }
 
     bwvSearch.addEventListener('input', renderCatalog);
-    categorySelect.addEventListener('change', renderCatalog);
+    subcategorySelect.addEventListener('change', renderCatalog);
     initArchive();
   </script>
 </body>
