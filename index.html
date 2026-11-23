@@ -414,7 +414,6 @@
       transition: width 0.06s linear;
     }
 
-    /* Telemetry Strip: Dynamics (Left) | Sustain Pedal (Center) | Tempo & Key Signature (Right) */
     .piano-telemetry {
       display: flex;
       justify-content: space-between;
@@ -527,7 +526,6 @@
     }
     .pill-link:hover { background: var(--velvet-crimson); }
 
-    /* Category Catalogs & Playlist Headers */
     .catalog-controls {
       display: flex;
       gap: 0.75rem;
@@ -652,11 +650,6 @@
       border: 1px solid var(--gold-dim);
       padding: 0.1rem 0.5rem;
       border-radius: 3px;
-    }
-    .cat-label {
-      font-size: 0.85rem;
-      font-style: italic;
-      color: var(--parchment-muted);
     }
 
     .board-grid {
@@ -1352,7 +1345,6 @@
     let queueAdvanceTimer = null;
     let manualSynth = null;
 
-    // Playlist & Shuffle Queue State
     let playlistQueue = [];
     let playlistIndex = -1;
     let playlistActive = false;
@@ -1406,7 +1398,6 @@
       clearTimeout(queueAdvanceTimer);
       if (manualStopRequested) return;
 
-      // If no explicit playlist was started, fall back to full tracks list when Next is clicked
       if (!playlistActive || playlistQueue.length === 0) {
         if (tracks.length === 0) return;
         const idx = tracks.findIndex(t => t.path === activePath);
@@ -1583,10 +1574,20 @@
         if (!res.ok) return;
         const buf = await res.arrayBuffer();
         const parsed = parseStandardMidiFile(buf);
+
         if (parsed.keySignatureLabel) {
           currentKeySigText = parsed.keySignatureLabel;
           updateTempoKeyDisplay();
         }
+
+        if (parsed.initialBpm && parsed.initialBpm > 0) {
+          baseTempo = parsed.initialBpm;
+          const noteCount = midiPlayer.noteSequence?.notes?.length || 0;
+          currentTempoNotesText = `${Math.round(baseTempo)} BPM • ${noteCount} notes`;
+          updateTempoKeyDisplay();
+          applyTempoSlider();
+        }
+
         hwMidiPlayer.setEvents(parsed.events);
         hwMidiPlayer.setTempoScale((parseInt(tempoSlider.value, 10) || 100) / 100);
         if (midiOutEnabled && selectedMidiOutput && isPlayerRunning()) {
@@ -1740,7 +1741,6 @@
       mergedProgressFill.style.width = `${pct}%`;
       timeReadout.textContent = `${formatTime(t)} / ${formatTime(dur)}`;
 
-      // Check if track has reached its end during playlist playback
       if (trackStartedFlag && !manualStopRequested && dur > 0.5) {
         const atEnd = (t >= dur - 0.12) || (!running && maxObservedTimeSec >= dur - 0.5);
         if (atEnd) {
@@ -1839,7 +1839,11 @@
       const ns = midiPlayer.noteSequence;
       if (!ns) return;
 
-      baseTempo = ns.tempos?.[0]?.qpm || 120;
+      const seqBpm = ns.tempos?.[0]?.qpm;
+      if (seqBpm && seqBpm > 0) {
+        baseTempo = seqBpm;
+      }
+
       totalDuration = ns.totalTime || 0;
       const notes = ns.notes || [];
       const velocities = notes.map(n => n.velocity).filter(v => typeof v === 'number' && v > 0);
@@ -1978,7 +1982,7 @@
       pedalEvents = [];
       totalDuration = 0;
       currentKeySigText = '—';
-      currentTempoNotesText = '120 BPM • —';
+      currentTempoNotesText = 'Loading BPM…';
       updateTempoKeyDisplay();
       mergedProgressFill.style.width = '0%';
       timeReadout.textContent = '0:00 / 0:00';
@@ -1998,7 +2002,10 @@
       const onTrackLoaded = () => {
         clearTimeout(trackLoadTimer);
         analyzeSequence();
-        applyTempoSlider();
+        setTimeout(() => {
+          analyzeSequence();
+          applyTempoSlider();
+        }, 120);
         if (autoPlay && !started) {
           started = true;
           setTimeout(() => {
@@ -2009,7 +2016,7 @@
               midiPlayer.start();
               setPlayPauseLabel(true);
             } catch (e) {}
-          }, 80);
+          }, 140);
         }
       };
 
@@ -2044,7 +2051,6 @@
         !q || `${t.bwv || ''} ${t.title || ''} ${t.category || ''} ${t.path || ''}`.toLowerCase().includes(q)
       );
 
-      // Group dynamically by category / folder so new MIDI folders appear automatically
       const groupsMap = new Map();
       for (const t of filtered) {
         const folder = getFolderFromPath(t.path);
