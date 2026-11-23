@@ -1,2153 +1,866 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Meghalaya Philharmonic Society | Bach Sanctum &amp; Musical Archive</title>
-
-  <!-- Baroque Display & Classical Serif Typography -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@500;600;700&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
-
-  <!-- Magenta + html-midi-player Bundle -->
-  <script src="https://cdn.jsdelivr.net/combine/npm/tone@14.7.58,npm/@magenta/music@1.23.1/es6/core.js,npm/focus-visible@5,npm/html-midi-player@1.5.0"></script>
-
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Meghalaya Philharmonic Society — J.S. Bach MIDI Archive</title>
   <style>
     :root {
-      --bg-obsidian: #0c0907;
-      --bg-mahogany: #17100c;
-      --bg-panel: #1e1510;
-      --velvet-crimson: #4e111b;
-      --velvet-deep: #2e0910;
-      --gold-bright: #e5c158;
-      --gold-antique: #c59b27;
-      --gold-dim: rgba(197, 155, 39, 0.32);
-      --parchment: #f3ead8;
-      --parchment-muted: #c2b49a;
-      --shadow-cathedral: 0 20px 50px rgba(0, 0, 0, 0.78);
+      --bg-deep: #120e0a;
+      --bg-panel: #1c1510;
+      --bg-card: #241b14;
+      --gold: #d4af37;
+      --gold-soft: rgba(212, 175, 55, 0.25);
+      --ivory: #f5efe6;
+      --muted: #c7b9a5;
+      --border: rgba(212, 175, 55, 0.3);
     }
 
-    * { box-sizing: border-box; }
-    html { scroll-behavior: smooth; }
+    * {
+      box-sizing: border-box;
+    }
 
     body {
       margin: 0;
-      background-color: var(--bg-obsidian);
-      background-image:
-        radial-gradient(ellipse at 50% 0%, rgba(212, 175, 55, 0.14) 0%, transparent 55%),
-        radial-gradient(circle at 15% 30%, rgba(78, 17, 27, 0.25) 0%, transparent 45%),
-        radial-gradient(circle at 85% 70%, rgba(78, 17, 27, 0.22) 0%, transparent 45%),
-        repeating-linear-gradient(90deg, rgba(255,255,255,0.012) 0px, rgba(255,255,255,0.012) 1px, transparent 1px, transparent 60px);
-      color: var(--parchment);
-      font-family: 'EB Garamond', Georgia, serif;
-      font-size: 18px;
-      line-height: 1.65;
+      font-family: "Georgia", "Times New Roman", serif;
+      background: radial-gradient(circle at top, #281d14 0%, var(--bg-deep) 70%);
+      color: var(--ivory);
+      min-height: 100vh;
     }
 
-    nav.royal-nav {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      background: rgba(12, 9, 7, 0.92);
-      backdrop-filter: blur(10px);
-      border-bottom: 1px solid var(--gold-dim);
-      padding: 0.75rem 1.5rem;
-    }
-    .nav-inner {
-      max-width: 1200px;
+    .container {
+      max-width: 1120px;
       margin: 0 auto;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 0.75rem;
+      padding: 20px;
     }
-    .brand-crest {
-      font-family: 'Cinzel Decorative', serif;
-      font-weight: 700;
-      font-size: 1.05rem;
-      color: var(--gold-bright);
-      text-decoration: none;
-      letter-spacing: 0.06em;
-    }
-    .nav-links {
-      display: flex;
-      gap: 1.25rem;
-      flex-wrap: wrap;
-    }
-    .nav-links a {
-      color: var(--parchment-muted);
-      text-decoration: none;
-      font-family: 'Cinzel', serif;
-      font-size: 0.8rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      transition: color 0.2s;
-    }
-    .nav-links a:hover { color: var(--gold-bright); }
 
-    header.cathedral-hero {
-      position: relative;
-      text-align: center;
-      padding: 3.2rem 1.5rem 3rem;
-      border-bottom: 2px solid var(--gold-dim);
-      background: linear-gradient(180deg, rgba(46, 9, 16, 0.55) 0%, rgba(12, 9, 7, 0.96) 100%);
-      overflow: hidden;
-    }
-    .society-logo-wrap {
-      margin: 0 auto 1.25rem;
+    header.palace-header {
       display: flex;
-      justify-content: center;
+      flex-wrap: wrap;
       align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 18px 22px;
+      background: linear-gradient(135deg, rgba(42, 30, 20, 0.95), rgba(20, 15, 11, 0.95));
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.55);
     }
-    .society-logo {
-      max-height: 128px;
-      max-width: 280px;
-      width: auto;
-      height: auto;
-      object-fit: contain;
-      filter: drop-shadow(0 6px 20px rgba(0, 0, 0, 0.8));
-      border-radius: 6px;
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 16px;
     }
-    .music-is-life {
-      font-family: 'Cinzel', serif;
-      font-size: 0.85rem;
-      letter-spacing: 0.28em;
-      text-transform: uppercase;
-      color: var(--gold-antique);
-      margin-bottom: 0.5rem;
+
+    .brand img {
+      width: 64px;
+      height: 64px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 1px solid var(--gold);
     }
-    h1.palace-title {
-      font-family: 'Cinzel Decorative', serif;
-      font-size: clamp(1.9rem, 4.5vw, 3.3rem);
-      font-weight: 900;
-      margin: 0.25rem auto;
-      max-width: 900px;
-      color: var(--gold-bright);
-      text-shadow: 0 4px 24px rgba(0, 0, 0, 0.9), 0 0 30px rgba(212, 175, 55, 0.25);
-      line-height: 1.2;
+
+    .brand-title {
+      margin: 0;
+      font-size: 1.45rem;
+      letter-spacing: 0.04em;
+      color: var(--gold);
     }
-    .hero-motto {
-      max-width: 740px;
-      margin: 1rem auto 0;
+
+    .motto {
+      margin: 4px 0 0;
       font-style: italic;
-      font-size: 1.15rem;
-      color: var(--parchment-muted);
+      color: var(--muted);
+      font-size: 0.95rem;
     }
 
-    main {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 2.5rem 1.25rem 5rem;
-    }
-    .movement-header {
-      text-align: center;
-      margin: 3rem 0 1.75rem;
-    }
-    .movement-numeral {
-      font-family: 'Cinzel', serif;
+    .midi-status {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
       font-size: 0.85rem;
-      letter-spacing: 0.25em;
-      color: var(--gold-antique);
-      text-transform: uppercase;
-      display: block;
-    }
-    .movement-header h2 {
-      font-family: 'Cinzel Decorative', serif;
-      font-size: clamp(1.4rem, 2.8vw, 2.1rem);
-      color: var(--gold-bright);
-      margin: 0.2rem 0 0.5rem;
-    }
-    .gilded-divider {
-      width: 220px;
-      height: 1px;
-      margin: 0.5rem auto 0;
-      background: linear-gradient(90deg, transparent, var(--gold-antique), transparent);
     }
 
-    .baroque-frame {
-      background: linear-gradient(160deg, var(--bg-panel) 0%, var(--bg-mahogany) 100%);
-      border: 1px solid var(--gold-antique);
-      outline: 1px solid rgba(197, 155, 39, 0.22);
-      outline-offset: -7px;
+    select, input[type="search"], button {
+      font-family: inherit;
+      color: var(--ivory);
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
       border-radius: 6px;
-      padding: 1.75rem;
-      box-shadow: var(--shadow-cathedral);
+      padding: 8px 12px;
+      font-size: 0.9rem;
     }
 
-    .sanctum-now-playing {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-end;
-      flex-wrap: wrap;
-      gap: 0.75rem;
-      padding-bottom: 0.9rem;
-      margin-bottom: 0.9rem;
-      border-bottom: 1px solid var(--gold-dim);
-    }
-    .now-bwv {
-      font-family: 'Cinzel', serif;
-      font-size: 0.85rem;
-      letter-spacing: 0.16em;
-      color: var(--gold-antique);
-      text-transform: uppercase;
-    }
-    .now-title {
-      font-family: 'Cinzel Decorative', serif;
-      font-size: 1.3rem;
-      color: var(--gold-bright);
-      margin: 0.15rem 0 0;
-    }
-    .playlist-badge {
-      font-family: 'Cinzel', serif;
-      font-size: 0.74rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--gold-bright);
-      background: rgba(78, 17, 27, 0.55);
-      border: 1px solid var(--gold-dim);
-      padding: 0.25rem 0.65rem;
-      border-radius: 4px;
-    }
-
-    .midi-hw-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 0.65rem;
-      padding: 0.65rem 0.9rem;
-      margin-bottom: 0.9rem;
-      background: rgba(12, 9, 7, 0.82);
-      border: 1px solid var(--gold-dim);
-      border-radius: 6px;
-    }
-    .midi-hw-group {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      flex-wrap: wrap;
-    }
-    .transport-actions {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-      padding-right: 0.55rem;
-      margin-right: 0.1rem;
-      border-right: 1px solid var(--gold-dim);
-      flex-wrap: wrap;
-    }
-    .midi-status-text {
-      font-size: 0.88rem;
-      color: var(--parchment-muted);
-      margin-left: auto;
-    }
-
-    select, input[type="search"], button.royal-btn {
-      background: #120c09;
-      color: var(--parchment);
-      border: 1px solid var(--gold-antique);
-      border-radius: 4px;
-      padding: 0.42rem 0.7rem;
-      font-family: 'EB Garamond', serif;
-      font-size: 0.98rem;
-    }
-    button.royal-btn {
-      font-family: 'Cinzel', serif;
-      font-size: 0.72rem;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
+    button {
       cursor: pointer;
-      background: linear-gradient(180deg, var(--velvet-crimson), var(--velvet-deep));
-      color: var(--gold-bright);
-      transition: all 0.2s;
-      padding: 0.34rem 0.58rem;
-    }
-    button.royal-btn:hover {
-      border-color: var(--gold-bright);
-      box-shadow: 0 0 14px rgba(212, 175, 55, 0.3);
-    }
-    button.royal-btn.active-toggle {
-      border-color: var(--gold-bright);
-      box-shadow: 0 0 10px rgba(229, 193, 88, 0.35);
-    }
-
-    .hidden-midi-engine {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      overflow: hidden;
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    .virtual-piano-wrap {
-      padding: 0.9rem;
-      background: rgba(12, 9, 7, 0.88);
-      border: 1px solid var(--gold-antique);
-      border-radius: 6px;
-      scroll-margin-top: 84px;
-    }
-    .virtual-piano-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 0.75rem;
-      margin-bottom: 0.7rem;
-    }
-    .piano-title-group {
-      display: flex;
-      align-items: center;
-      gap: 0.9rem;
-      flex-wrap: wrap;
-      font-family: 'Cinzel', serif;
-      font-size: 0.75rem;
-      letter-spacing: 0.12em;
-      color: var(--gold-antique);
-    }
-    .piano-controls-right {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      flex-wrap: wrap;
-    }
-    .tempo-control {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.45rem;
-      background: rgba(23, 16, 12, 0.95);
-      border: 1px solid var(--gold-dim);
-      border-radius: 4px;
-      padding: 0.3rem 0.65rem;
-    }
-    .tempo-control label {
-      font-family: 'Cinzel', serif;
-      font-size: 0.75rem;
-      letter-spacing: 0.1em;
-      color: var(--parchment-muted);
-    }
-    input[type="range"] {
-      accent-color: var(--gold-bright);
-      width: 115px;
-      cursor: pointer;
-    }
-    .tempo-readout {
-      font-family: 'Cinzel', serif;
-      font-size: 0.76rem;
-      color: var(--gold-bright);
-      min-width: 86px;
-      text-align: right;
-    }
-    .time-readout {
-      font-family: 'Cinzel', serif;
-      font-size: 0.74rem;
-      color: var(--parchment-muted);
-      letter-spacing: 0.06em;
-    }
-
-    .piano-scroller {
-      overflow-x: auto;
-      padding-bottom: 0.25rem;
-    }
-    .piano-deck {
-      width: 1196px;
-      border: 2px solid var(--gold-antique);
-      border-radius: 4px;
-      overflow: hidden;
-      background: #140f0c;
-    }
-    .piano-keyboard {
-      position: relative;
-      display: flex;
-      height: 132px;
-      width: 100%;
-      user-select: none;
-    }
-    .piano-white-key {
-      position: relative;
-      width: 23px;
-      height: 100%;
-      flex: 0 0 23px;
-      background: linear-gradient(180deg, #fbf6ea 0%, #efe3c8 100%);
-      border-right: 1px solid #2b1f16;
-      cursor: pointer;
-      z-index: 1;
-      transition: background 0.05s ease;
-    }
-    .piano-white-key:last-child { border-right: none; }
-    .piano-white-key.active {
-      background: linear-gradient(180deg, #f7d97e 0%, #c59b27 100%);
-      box-shadow: inset 0 -4px 8px rgba(78, 17, 27, 0.35);
-    }
-    .piano-black-key {
-      position: absolute;
-      top: 0;
-      width: 14px;
-      height: 80px;
-      background: linear-gradient(180deg, #2b211b 0%, #120c09 100%);
-      border: 1px solid #090605;
-      border-radius: 0 0 3px 3px;
-      cursor: pointer;
-      z-index: 2;
-      transition: background 0.05s ease;
-    }
-    .piano-black-key.active {
-      background: linear-gradient(180deg, #8b1e31 0%, #4e111b 100%);
-      box-shadow: 0 0 10px rgba(229, 193, 88, 0.55);
-    }
-
-    .merged-progress-track {
-      position: relative;
-      width: 100%;
-      height: 5px;
-      background: #1f1610;
-      border-top: 1px solid var(--gold-antique);
-      cursor: pointer;
-      overflow: hidden;
-    }
-    .merged-progress-fill {
-      height: 100%;
-      width: 0%;
-      background: linear-gradient(90deg, var(--gold-antique), var(--gold-bright));
-      transition: width 0.06s linear;
-    }
-
-    .piano-telemetry {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 0.75rem 1.25rem;
-      margin-top: 0.9rem;
-      padding: 0.75rem 1rem;
-      background: rgba(12, 9, 7, 0.78);
-      border: 1px solid var(--gold-dim);
-      border-radius: 4px;
-    }
-    .telemetry-cell {
-      flex: 1 1 0;
-      min-width: 200px;
-    }
-    .telemetry-cell.center { text-align: center; }
-    .telemetry-cell.right { text-align: right; }
-    @media (max-width: 760px) {
-      .telemetry-cell, .telemetry-cell.center, .telemetry-cell.right { text-align: left; }
-    }
-    .telemetry-label {
-      font-family: 'Cinzel', serif;
-      font-size: 0.7rem;
-      letter-spacing: 0.13em;
-      text-transform: uppercase;
-      color: var(--gold-antique);
-      display: block;
-      margin-bottom: 0.2rem;
-    }
-    .telemetry-value {
-      font-size: 0.96rem;
-      color: var(--parchment);
+      background: linear-gradient(180deg, #3a2b18, #24190d);
+      border-color: var(--gold);
+      color: var(--gold);
       font-weight: 600;
     }
-    .pedal-pill {
-      display: inline-block;
-      padding: 0.08rem 0.5rem;
-      border-radius: 3px;
-      font-family: 'Cinzel', serif;
-      font-size: 0.74rem;
-      border: 1px solid var(--gold-dim);
-      background: #17100c;
-      color: var(--parchment-muted);
-      vertical-align: middle;
-    }
-    .pedal-pill.down {
-      background: var(--velvet-crimson);
-      border-color: var(--gold-bright);
-      color: var(--gold-bright);
+
+    button:hover {
+      background: linear-gradient(180deg, #4b3820, #2f2112);
     }
 
-    .companion-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 1.5rem;
-      margin-top: 1.75rem;
+    .player-deck {
+      margin-top: 18px;
+      padding: 18px 22px;
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-radius: 10px;
     }
-    .companion-card {
-      background: rgba(12, 9, 7, 0.72);
-      border: 1px solid var(--gold-dim);
-      border-radius: 6px;
-      padding: 1.15rem;
+
+    .now-playing-row {
       display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-    }
-    .companion-card h3 {
-      font-family: 'Cinzel', serif;
-      font-size: 0.95rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--gold-bright);
-      margin: 0 0 0.35rem;
-      display: flex;
+      flex-wrap: wrap;
       justify-content: space-between;
       align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
     }
-    .companion-note {
-      font-size: 0.92rem;
-      color: var(--parchment-muted);
-      margin: 0 0 0.85rem;
-      min-height: 2.75rem;
+
+    .now-playing-title {
+      font-size: 1.05rem;
+      font-weight: 600;
     }
-    .embed-frame {
-      width: 100%;
-      height: 394px;
-      border: 1px solid var(--gold-dim);
-      border-radius: 6px;
-      background: #090706;
-    }
-    .action-row {
+
+    .transport-bar {
       display: flex;
-      gap: 0.5rem;
       flex-wrap: wrap;
-      margin-top: 0.85rem;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 12px;
     }
-    .pill-link {
-      display: inline-block;
-      font-family: 'Cinzel', serif;
-      font-size: 0.75rem;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--gold-bright);
-      text-decoration: none;
-      border: 1px solid var(--gold-dim);
-      padding: 0.35rem 0.65rem;
-      border-radius: 4px;
-      transition: background 0.2s;
+
+    .tempo-control {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.88rem;
+      color: var(--muted);
     }
-    .pill-link:hover { background: var(--velvet-crimson); }
+
+    .progress-track {
+      width: 100%;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.12);
+      border-radius: 999px;
+      overflow: hidden;
+      margin-bottom: 14px;
+      cursor: pointer;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: var(--gold);
+      transition: width 80ms linear;
+    }
+
+    .keyboard-wrap {
+      overflow-x: auto;
+      padding-bottom: 6px;
+    }
+
+    .piano-88 {
+      position: relative;
+      display: flex;
+      height: 112px;
+      min-width: 780px;
+      background: #0d0a08;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 4px;
+      user-select: none;
+    }
+
+    .white-key {
+      position: relative;
+      flex: 1;
+      height: 100%;
+      background: linear-gradient(180deg, #fffdf9 0%, #ede3d2 100%);
+      border: 1px solid #2b2118;
+      border-radius: 0 0 4px 4px;
+      z-index: 1;
+    }
+
+    .white-key.active {
+      background: linear-gradient(180deg, #ffe999 0%, var(--gold) 100%);
+    }
+
+    .black-key {
+      position: absolute;
+      top: 4px;
+      width: 1.35%;
+      height: 62%;
+      background: linear-gradient(180deg, #332920 0%, #120e0b 100%);
+      border: 1px solid #000;
+      border-radius: 0 0 3px 3px;
+      z-index: 2;
+      transform: translateX(-50%);
+    }
+
+    .black-key.active {
+      background: linear-gradient(180deg, #f3cb4b 0%, #a87e12 100%);
+    }
+
+    .catalog-section {
+      margin-top: 22px;
+    }
 
     .catalog-controls {
       display: flex;
-      gap: 0.75rem;
       flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 14px;
       align-items: center;
-      margin-bottom: 0.9rem;
-    }
-    .catalog-controls input[type="search"] { flex: 1; min-width: 240px; }
-    #catalogCount {
-      font-size: 0.88rem;
-      color: var(--parchment-muted);
-      margin-bottom: 1rem;
     }
 
-    .category-sections {
-      display: grid;
-      gap: 1.5rem;
-    }
-    .category-block {
-      background: rgba(12, 9, 7, 0.55);
-      border: 1px solid var(--gold-dim);
-      border-radius: 6px;
-      padding: 1rem;
-    }
-    .category-header-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 0.65rem;
-      padding-bottom: 0.7rem;
-      margin-bottom: 0.8rem;
-      border-bottom: 1px solid var(--gold-dim);
-    }
-    .category-title-wrap {
-      display: flex;
-      align-items: baseline;
-      gap: 0.65rem;
-      flex-wrap: wrap;
-    }
-    .category-heading {
-      font-family: 'Cinzel Decorative', serif;
-      font-size: 1.08rem;
-      color: var(--gold-bright);
-      margin: 0;
-    }
-    .category-folder-pill {
-      font-family: 'Cinzel', serif;
-      font-size: 0.72rem;
-      letter-spacing: 0.08em;
-      color: var(--parchment-muted);
-      background: rgba(197, 155, 39, 0.1);
-      border: 1px solid var(--gold-dim);
-      padding: 0.1rem 0.5rem;
-      border-radius: 3px;
-    }
-    .playlist-link-group {
-      display: flex;
-      align-items: center;
-      gap: 0.45rem;
-      flex-wrap: wrap;
-    }
-    .playlist-link-btn {
-      font-family: 'Cinzel', serif;
-      font-size: 0.72rem;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--gold-bright);
-      background: linear-gradient(180deg, var(--velvet-crimson), var(--velvet-deep));
-      border: 1px solid var(--gold-antique);
-      border-radius: 4px;
-      padding: 0.32rem 0.65rem;
-      cursor: pointer;
-      text-decoration: none;
-      transition: all 0.18s;
-    }
-    .playlist-link-btn:hover {
-      border-color: var(--gold-bright);
-      box-shadow: 0 0 12px rgba(229, 193, 88, 0.3);
+    #search-input {
+      flex: 1 1 240px;
     }
 
-    .catalog-list {
+    .track-list {
       display: grid;
-      gap: 0.55rem;
-      max-height: 440px;
-      overflow-y: auto;
-      padding-right: 0.35rem;
+      gap: 8px;
     }
+
     .track-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 0.75rem;
-      padding: 0.72rem 0.95rem;
-      background: rgba(12, 9, 7, 0.82);
-      border: 1px solid var(--gold-dim);
-      border-radius: 4px;
+      gap: 12px;
+      padding: 11px 14px;
+      border-radius: 7px;
+      background: var(--bg-card);
+      border: 1px solid rgba(212, 175, 55, 0.18);
       cursor: pointer;
-      transition: all 0.18s;
+      transition: background 0.15s ease, border-color 0.15s ease;
     }
+
     .track-row:hover {
-      border-color: var(--gold-bright);
-      background: rgba(78, 17, 27, 0.35);
+      background: rgba(212, 175, 55, 0.12);
+      border-color: var(--gold);
     }
+
     .track-row.active {
-      border-color: var(--gold-bright);
-      background: linear-gradient(90deg, rgba(78, 17, 27, 0.75), rgba(23, 16, 12, 0.9));
-      box-shadow: inset 3px 0 0 var(--gold-bright);
+      background: rgba(212, 175, 55, 0.2);
+      border-color: var(--gold);
     }
-    .track-info {
-      display: flex;
-      align-items: baseline;
-      gap: 0.75rem;
-      flex-wrap: wrap;
-    }
-    .bwv-tag {
-      font-family: 'Cinzel', serif;
+
+    .bwv-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      margin-right: 8px;
+      border-radius: 4px;
+      font-size: 0.78rem;
       font-weight: 700;
-      font-size: 0.85rem;
-      color: var(--gold-bright);
-      background: rgba(197, 155, 39, 0.14);
-      border: 1px solid var(--gold-dim);
-      padding: 0.1rem 0.5rem;
-      border-radius: 3px;
+      letter-spacing: 0.04em;
+      background: var(--gold);
+      color: #16120e;
     }
 
-    .board-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-      gap: 1.25rem;
+    .track-meta {
+      font-size: 0.8rem;
+      color: var(--muted);
+      white-space: nowrap;
     }
-    .member-card {
-      text-align: center;
-      background: rgba(12, 9, 7, 0.78);
-      border: 1px solid var(--gold-dim);
-      border-radius: 6px;
-      padding: 1.35rem 1rem;
-    }
-    .member-role {
-      font-family: 'Cinzel', serif;
-      font-size: 0.75rem;
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
-      color: var(--gold-antique);
-      margin-bottom: 0.35rem;
-    }
-    .member-name {
-      font-family: 'Cinzel Decorative', serif;
-      font-size: 1.05rem;
-      color: var(--gold-bright);
-      margin: 0;
-    }
-
-    footer.palace-footer {
-      text-align: center;
-      padding: 2.5rem 1.25rem;
-      border-top: 1px solid var(--gold-dim);
-      background: #080605;
-      color: var(--parchment-muted);
-      font-size: 0.95rem;
-    }
-    footer.palace-footer strong { color: var(--gold-bright); }
   </style>
 </head>
 <body>
-
-  <nav class="royal-nav">
-    <div class="nav-inner">
-      <a href="#top" class="brand-crest">Meghalaya Philharmonic Society</a>
-      <div class="nav-links">
-        <a href="#sanctum">Competition Piano Sanctum</a>
-        <a href="#catalog">MIDI Catalogs</a>
-        <a href="#companion">Scores &amp; Recordings</a>
-        <a href="#collegium">Governing Body</a>
-      </div>
-    </div>
-  </nav>
-
-  <header id="top" class="cathedral-hero">
-    <div class="society-logo-wrap">
-      <img
-        src="image_d54689.png"
-        alt="Meghalaya Philharmonic Society Emblem"
-        class="society-logo"
-        onerror="this.style.display='none';"
-      >
-    </div>
-
-    <div class="music-is-life">Music is Life &bull; Musica Est Vita &bull; Shillong, Meghalaya</div>
-    <h1 class="palace-title">Meghalaya Philharmonic Society</h1>
-    <p class="hero-motto">
-      A Baroque sanctuary uniting Johann Sebastian Bach's works with curated competition piano recordings—rich in expressive dynamics and sustain pedal nuance—alongside interactive scores and orchestral training for young musicians in Meghalaya.
-    </p>
-  </header>
-
-  <main>
-
-    <!-- MOVEMENT I: COMPETITION PIANO & MIDI SANCTUM -->
-    <section id="sanctum">
-      <div class="movement-header">
-        <span class="movement-numeral">Movement I &bull; Competition Piano &amp; MIDI Sanctum</span>
-        <h2>Expressive Piano &amp; Classical MIDI Archive</h2>
-        <div class="gilded-divider"></div>
+  <div class="container">
+    <header class="palace-header">
+      <div class="brand">
+        <img src="image_d54689.png" alt="Meghalaya Philharmonic Society Emblem" />
+        <div>
+          <h1 class="brand-title">Meghalaya Philharmonic Society</h1>
+          <p class="motto">Musica Est Vita / Music is Life — J.S. Bach MIDI Archive</p>
+        </div>
       </div>
 
-      <div id="sanctumFrame" class="baroque-frame">
-        <div class="sanctum-now-playing">
-          <div>
-            <div id="nowBwv" class="now-bwv">Johann Sebastian Bach &bull; Competition Piano MIDI</div>
-            <h3 id="nowTitle" class="now-title">Select a Piece or Category Playlist Below</h3>
-          </div>
-          <div id="playlistStatusBadge" class="playlist-badge">Single Track Mode</div>
+      <div class="midi-status">
+        <label for="midi-out-select">MIDI Out:</label>
+        <select id="midi-out-select">
+          <option value="">Web MIDI: Detecting...</option>
+        </select>
+        <button id="panic-btn" type="button" title="Reset Controllers (CC#121) & All Notes Off (CC#123)">
+          Panic / Reset
+        </button>
+      </div>
+    </header>
+
+    <section class="player-deck">
+      <div class="now-playing-row">
+        <div class="now-playing-title" id="now-playing">Select a piece from the catalog to begin</div>
+        <div class="track-meta" id="time-readout">00:00 / 00:00</div>
+      </div>
+
+      <div class="transport-bar">
+        <button id="play-pause-btn" type="button">Play / Pause</button>
+        <button id="stop-btn" type="button">Stop</button>
+
+        <div class="tempo-control">
+          <label for="tempo-slider">Tempo Scale:</label>
+          <input id="tempo-slider" type="range" min="0.5" max="1.5" step="0.05" value="1.0" />
+          <span id="tempo-value">100%</span>
         </div>
+      </div>
 
-        <!-- Transport Buttons + Hardware MIDI Controls & Inline Status -->
-        <div class="midi-hw-bar">
-          <div class="midi-hw-group">
-            <div class="transport-actions">
-              <button id="playPauseBtn" class="royal-btn" type="button">Play</button>
-              <button id="stopBtn" class="royal-btn" type="button">Stop</button>
-              <button id="nextTrackBtn" class="royal-btn" type="button" title="Skip to next track in queue">Next</button>
-              <button id="shuffleBtn" class="royal-btn" type="button" title="Toggle shuffle order for playlist queue">Shuffle: OFF</button>
-            </div>
-            <button id="midiOutToggle" class="royal-btn" type="button">MIDI Out: OFF</button>
-            <select id="midiOutSelect" aria-label="Detected MIDI Output Instrument">
-              <option value="">Scanning MIDI devices...</option>
-            </select>
-            <button id="midiScanBtn" class="royal-btn" type="button">Rescan</button>
-          </div>
-          <span id="midiOutStatus" class="midi-status-text">Checking Web MIDI support...</span>
-        </div>
+      <div class="progress-track" id="progress-track" title="Seek">
+        <div class="progress-fill" id="progress-fill"></div>
+      </div>
 
-        <!-- Off-screen MIDI Engine -->
-        <div class="hidden-midi-engine" aria-hidden="true">
-          <midi-player
-            id="bachMidiPlayer"
-            sound-font="https://storage.googleapis.com/magentadata/js/soundfonts/sgm_plus">
-          </midi-player>
-        </div>
-
-        <!-- Tempo Slider Above Virtual Piano + Thin Progress Bar Merged Below -->
-        <div id="virtualPianoSection" class="virtual-piano-wrap">
-          <div class="virtual-piano-top">
-            <div class="piano-title-group">
-              <span>88-KEY VIRTUAL PIANO (A0 – C8)</span>
-              <span id="activeNotesReadout">Active Notes: —</span>
-            </div>
-
-            <div class="piano-controls-right">
-              <span id="timeReadout" class="time-readout">0:00 / 0:00</span>
-              <div class="tempo-control" title="Adjust playback tempo from 50% to 130%">
-                <label for="tempoSlider">Tempo:</label>
-                <input id="tempoSlider" type="range" min="50" max="130" step="5" value="100">
-                <span id="tempoReadout" class="tempo-readout">100%</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="piano-scroller">
-            <div class="piano-deck">
-              <div id="virtualPiano" class="piano-keyboard" aria-label="88-key interactive virtual piano"></div>
-              <div id="mergedProgressTrack" class="merged-progress-track" title="Click to seek playback position">
-                <div id="mergedProgressFill" class="merged-progress-fill"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Telemetry Strip: Dynamics (Left) | Sustain Pedal (Center) | Tempo & Key Signature (Right) -->
-        <div class="piano-telemetry">
-          <div class="telemetry-cell">
-            <span class="telemetry-label">Dynamic Range (Velocity)</span>
-            <span id="dynamicsSummary" class="telemetry-value">f–f (102)</span>
-          </div>
-          <div class="telemetry-cell center">
-            <span class="telemetry-label">Sustain Pedal (CC 64)</span>
-            <span id="pedalSummary" class="telemetry-value">Continuous</span>
-            <span id="pedalBadge" class="pedal-pill" style="margin-left:0.35rem;">UP</span>
-          </div>
-          <div class="telemetry-cell right">
-            <span class="telemetry-label">Tempo &amp; Key Signature</span>
-            <span id="tempoKeySummary" class="telemetry-value">120 BPM &bull; —</span>
-          </div>
-        </div>
-
-        <!-- SYNCHRONIZED 3-CARD COMPANION STAGE -->
-        <div id="companion" class="companion-grid">
-
-          <div class="companion-card">
-            <div>
-              <h3><span>Spotify Recordings</span> <span>&#9835;</span></h3>
-              <p id="spotifyCaption" class="companion-note">
-                Synchronized recordings matching the currently selected classical work.
-              </p>
-              <iframe
-                id="spotifyEmbed"
-                class="embed-frame"
-                src="https://open.spotify.com/embed/artist/5aIqB5nVVvmFsvSdExz408?utm_source=generator&theme=0"
-                frameborder="0"
-                allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-                loading="lazy">
-              </iframe>
-            </div>
-            <div class="action-row">
-              <a id="spotifySearchLink" class="pill-link" href="https://open.spotify.com/search/Johann%20Sebastian%20Bach" target="_blank" rel="noopener">
-                Search Work on Spotify &nearr;
-              </a>
-            </div>
-          </div>
-
-          <div class="companion-card">
-            <div>
-              <h3><span>MuseScore Edition</span> <span>&#119070;</span></h3>
-              <p id="musescoreCaption" class="companion-note">
-                <a href="https://musescore.com/user/11548381/scores/10173982/s/7_gs7O" target="_blank" rel="noopener" style="color:var(--gold-bright);">J. S. Bach 15 2 Part Inventions BWV 772–786</a> by <a href="https://musescore.com/user/11548381" target="_blank" rel="noopener" style="color:var(--parchment);">Marc Nongmaithem</a>
-              </p>
-              <iframe
-                id="score-iframe"
-                class="embed-frame"
-                width="100%"
-                height="394"
-                src="https://musescore.com/user/11548381/scores/10173982/embed"
-                frameborder="0"
-                allowfullscreen
-                allow="autoplay; fullscreen"
-                loading="lazy">
-              </iframe>
-            </div>
-            <div class="action-row">
-              <a id="musescoreSearchLink" class="pill-link" href="https://musescore.com/user/11548381/scores/10173982/s/7_gs7O" target="_blank" rel="noopener">
-                Open Score on MuseScore &nearr;
-              </a>
-            </div>
-          </div>
-
-          <div class="companion-card">
-            <div>
-              <h3><span>Performance &amp; Masterclass</span> <span>&#9654;</span></h3>
-              <p id="youtubeCaption" class="companion-note">
-                Reference piano and classical performances for study and comparison.
-              </p>
-              <iframe
-                id="youtubeEmbed"
-                class="embed-frame"
-                src="https://www.youtube.com/embed/1prweT95Mo0"
-                frameborder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowfullscreen
-                loading="lazy">
-              </iframe>
-            </div>
-            <div class="action-row">
-              <a id="youtubeSearchLink" class="pill-link" href="https://www.youtube.com/results?search_query=Johann+Sebastian+Bach+piano" target="_blank" rel="noopener">
-                More Performances on YouTube &nearr;
-              </a>
-            </div>
-          </div>
-
-        </div>
+      <div class="keyboard-wrap">
+        <div class="piano-88" id="piano-88"></div>
       </div>
     </section>
 
-    <!-- MOVEMENT II: MULTI-CATEGORY MIDI CATALOGS -->
-    <section id="catalog">
-      <div class="movement-header">
-        <span class="movement-numeral">Movement II &bull; Curated Competition &amp; Repertoire Archive</span>
-        <h2>Repertoire Catalogs &amp; Category Playlists</h2>
-        <div class="gilded-divider"></div>
+    <section class="catalog-section">
+      <div class="catalog-controls">
+        <input
+          id="search-input"
+          type="search"
+          placeholder="Search BWV number, piece title, or track..."
+        />
+
+        <select id="category-filter">
+          <option value="ALL">All Sources</option>
+          <option value="bach">Bach Folder (midi/bach)</option>
+          <option value="Glenn Gould">Glenn Gould</option>
+          <option value="2002  eCompetition Winners (MID)">2002 eCompetition</option>
+          <option value="2004  eCompetition Winners (MID)">2004 eCompetition</option>
+          <option value="2006 eCompetition Winners (MID)">2006 eCompetition</option>
+          <option value="2008 eCompetiion Winners (MID)">2008 eCompetition</option>
+          <option value="2009 eCompetition (MID) Winners">2009 eCompetition</option>
+          <option value="2011 Disklavier Competition Winners (MID)">2011 Disklavier</option>
+          <option value="2011 eCompetition (MID)">2011 eCompetition</option>
+        </select>
+
+        <select id="sort-select">
+          <option value="bwv">Sort: BWV Number</option>
+          <option value="order">Sort: Catalog Order</option>
+          <option value="title">Sort: Title (A–Z)</option>
+        </select>
       </div>
 
-      <div class="baroque-frame">
-        <div class="catalog-controls">
-          <input
-            type="search"
-            id="bwvSearch"
-            placeholder="Search across all MIDI folders & catalogs (e.g., BWV, Prelude, Fugue, Invention, Nocturne, Sonata)..."
-          >
-          <button id="playAllArchiveBtn" class="royal-btn" type="button">&#9654; Play All Catalogs</button>
-          <button id="shuffleAllArchiveBtn" class="royal-btn" type="button">&#8644; Shuffle All</button>
-        </div>
-
-        <div id="catalogCount"></div>
-        <div id="categoryCatalogsContainer" class="category-sections"></div>
-      </div>
+      <div class="track-list" id="track-list"></div>
     </section>
-
-    <!-- MOVEMENT III: GOVERNING BODY & MANDATE -->
-    <section id="collegium">
-      <div class="movement-header">
-        <span class="movement-numeral">Movement III &bull; Collegium Musicum</span>
-        <h2>Governing Body &amp; Society Mandate</h2>
-        <div class="gilded-divider"></div>
-      </div>
-
-      <div class="baroque-frame">
-        <p style="text-align:center; max-width:820px; margin:0 auto 2rem; color:var(--parchment);">
-          Founded in Shillong to foster the appreciation, training, and performance of classical, traditional, and orchestral music across Meghalaya, equipping music educators and young talents with open digital scores, expressive MIDI study tools, and ensemble mentorship.
-        </p>
-
-        <div class="board-grid">
-          <div class="member-card">
-            <div class="member-role">President</div>
-            <h3 class="member-name">Lenar Phawa</h3>
-          </div>
-          <div class="member-card">
-            <div class="member-role">Vice President</div>
-            <h3 class="member-name">Dolrich G Momin</h3>
-          </div>
-          <div class="member-card">
-            <div class="member-role">General Secretary</div>
-            <h3 class="member-name">Dr. Marc Nongmaithem</h3>
-          </div>
-          <div class="member-card">
-            <div class="member-role">Treasurer</div>
-            <h3 class="member-name">A J Momin</h3>
-          </div>
-          <div class="member-card">
-            <div class="member-role">Advisor</div>
-            <h3 class="member-name">Prof. Aribam Uttam Sharma</h3>
-          </div>
-        </div>
-      </div>
-    </section>
-
-  </main>
-
-  <footer class="palace-footer">
-    <p><strong>Meghalaya Philharmonic Society</strong> &bull; Head Office: B7F NEIGRIHMS, Shillong – 793018, East Khasi Hills District, Meghalaya</p>
-    <p style="font-size:0.85rem; margin-top:0.35rem;">Dedicated to Classical Music Education, Digital Pedagogy &amp; the Works of Johann Sebastian Bach</p>
-  </footer>
+  </div>
 
   <script>
-    const MAJOR_BY_FIFTHS = {
-      '-7': 'Cb Maj', '-6': 'Gb Maj', '-5': 'Db Maj', '-4': 'Ab Maj',
-      '-3': 'Eb Maj', '-2': 'Bb Maj', '-1': 'F Maj', '0': 'C Maj',
-      '1': 'G Maj', '2': 'D Maj', '3': 'A Maj', '4': 'E Maj',
-      '5': 'B Maj', '6': 'F# Maj', '7': 'C# Maj'
-    };
-    const MINOR_BY_FIFTHS = {
-      '-7': 'Ab Min', '-6': 'Eb Min', '-5': 'Bb Min', '-4': 'F Min',
-      '-3': 'C Min', '-2': 'G Min', '-1': 'D Min', '0': 'A Min',
-      '1': 'E Min', '2': 'B Min', '3': 'F# Min', '4': 'C# Min',
-      '5': 'G# Min', '6': 'D# Min', '7': 'A# Min'
-    };
+    // =========================================================================
+    // 1. 88-Key Virtual Piano (MIDI Notes 21 [A0] to 108 [C8])
+    // =========================================================================
+    const keyElements = new Map();
 
-    function formatKeySignature(sfSigned, isMinor) {
-      const clamped = Math.max(-7, Math.min(7, sfSigned || 0));
-      const keyStr = isMinor
-        ? (MINOR_BY_FIFTHS[String(clamped)] || 'A Min')
-        : (MAJOR_BY_FIFTHS[String(clamped)] || 'C Maj');
-      if (clamped === 0) return `${keyStr} (0♯/♭)`;
-      if (clamped > 0) return `${keyStr} (${clamped}♯)`;
-      return `${keyStr} (${Math.abs(clamped)}♭)`;
+    function build88KeyPiano() {
+      const pianoEl = document.getElementById("piano-88");
+      pianoEl.innerHTML = "";
+      keyElements.clear();
+
+      const isBlackNote = (midi) => [1, 3, 6, 8, 10].includes(midi % 12);
+      const whiteNotes = [];
+      for (let m = 21; m <= 108; m++) {
+        if (!isBlackNote(m)) whiteNotes.push(m);
+      }
+
+      whiteNotes.forEach((midi) => {
+        const wKey = document.createElement("div");
+        wKey.className = "white-key";
+        wKey.dataset.midi = midi;
+        pianoEl.appendChild(wKey);
+        keyElements.set(midi, wKey);
+      });
+
+      const totalWhite = whiteNotes.length; // 52 white keys
+      for (let m = 21; m <= 108; m++) {
+        if (!isBlackNote(m)) continue;
+        let whiteBefore = 0;
+        for (let k = 21; k < m; k++) {
+          if (!isBlackNote(k)) whiteBefore++;
+        }
+        const leftPercent = (whiteBefore / totalWhite) * 100;
+        const bKey = document.createElement("div");
+        bKey.className = "black-key";
+        bKey.dataset.midi = m;
+        bKey.style.left = `${leftPercent}%`;
+        pianoEl.appendChild(bKey);
+        keyElements.set(m, bKey);
+      }
     }
 
-    function parseStandardMidiFile(arrayBuffer) {
-      const bytes = new Uint8Array(arrayBuffer);
-      let pos = 0;
-
-      function readStr(len) {
-        const s = String.fromCharCode(...bytes.slice(pos, pos + len));
-        pos += len;
-        return s;
-      }
-      function readU32() {
-        const v = ((bytes[pos] << 24) | (bytes[pos + 1] << 16) | (bytes[pos + 2] << 8) | bytes[pos + 3]) >>> 0;
-        pos += 4;
-        return v;
-      }
-      function readU16() {
-        const v = ((bytes[pos] << 8) | bytes[pos + 1]) >>> 0;
-        pos += 2;
-        return v;
-      }
-      function readVarLen() {
-        let value = 0;
-        let b;
-        do {
-          if (pos >= bytes.length) break;
-          b = bytes[pos++];
-          value = (value << 7) | (b & 0x7F);
-        } while (b & 0x80);
-        return value;
-      }
-
-      if (readStr(4) !== 'MThd') {
-        throw new Error('Invalid MIDI header');
-      }
-      const headerLen = readU32();
-      const format = readU16();
-      const numTracks = readU16();
-      const division = readU16();
-      pos = 8 + headerLen;
-
-      const ticksPerQuarter = (division & 0x8000) ? 480 : (division || 480);
-      const rawEvents = [];
-      const tempoChanges = [{ tick: 0, usPerQuarter: 500000 }];
-      let keySignatureLabel = null;
-
-      for (let t = 0; t < numTracks && pos < bytes.length; t++) {
-        if (pos + 8 > bytes.length) break;
-        const chunkType = readStr(4);
-        const chunkLen = readU32();
-        const chunkEnd = Math.min(bytes.length, pos + chunkLen);
-
-        if (chunkType !== 'MTrk') {
-          pos = chunkEnd;
-          continue;
-        }
-
-        let tick = 0;
-        let runningStatus = 0;
-
-        while (pos < chunkEnd) {
-          const delta = readVarLen();
-          tick += delta;
-          if (pos >= chunkEnd) break;
-
-          let status = bytes[pos];
-          if (status < 0x80) {
-            status = runningStatus;
-          } else {
-            pos++;
-            if (status < 0xF0) {
-              runningStatus = status;
-            }
-          }
-
-          if (status === 0xFF) {
-            const metaType = bytes[pos++] ?? 0;
-            const metaLen = readVarLen();
-            const metaData = bytes.slice(pos, pos + metaLen);
-            pos += metaLen;
-
-            if (metaType === 0x51 && metaLen >= 3) {
-              const uspq = (metaData[0] << 16) | (metaData[1] << 8) | metaData[2];
-              tempoChanges.push({ tick, usPerQuarter: uspq || 500000 });
-            } else if (metaType === 0x59 && metaLen >= 2 && !keySignatureLabel) {
-              const sfSigned = (metaData[0] << 24) >> 24;
-              const isMinor = metaData[1] === 1;
-              keySignatureLabel = formatKeySignature(sfSigned, isMinor);
-            }
-          } else if (status === 0xF0 || status === 0xF7) {
-            const sysexLen = readVarLen();
-            const payload = bytes.slice(pos, pos + sysexLen);
-            pos += sysexLen;
-
-            if (status === 0xF0) {
-              const packet = payload[payload.length - 1] === 0xF7
-                ? [0xF0, ...payload]
-                : [0xF0, ...payload, 0xF7];
-              rawEvents.push({ tick, bytes: packet, channel: null, isSysEx: true });
-            }
-          } else if (status >= 0x80 && status <= 0xEF) {
-            const msgType = status & 0xF0;
-            const channel = status & 0x0F;
-            const d1 = bytes[pos++] ?? 0;
-            const d2 = (msgType === 0xC0 || msgType === 0xD0) ? null : (bytes[pos++] ?? 0);
-            const evBytes = d2 === null ? [status, d1] : [status, d1, d2];
-            rawEvents.push({ tick, bytes: evBytes, channel, isSysEx: false });
-          }
-        }
-        pos = chunkEnd;
-      }
-
-      tempoChanges.sort((a, b) => a.tick - b.tick);
-      const cleanTempos = [];
-      for (const tc of tempoChanges) {
-        if (cleanTempos.length === 0 || cleanTempos[cleanTempos.length - 1].tick !== tc.tick) {
-          cleanTempos.push(tc);
-        } else {
-          cleanTempos[cleanTempos.length - 1] = tc;
-        }
-      }
-
-      function tickToBaseMs(targetTick) {
-        let ms = 0;
-        let prevTick = 0;
-        let uspq = cleanTempos[0].usPerQuarter;
-
-        for (let i = 1; i < cleanTempos.length; i++) {
-          const tc = cleanTempos[i];
-          if (targetTick <= tc.tick) break;
-          ms += ((tc.tick - prevTick) / ticksPerQuarter) * (uspq / 1000);
-          prevTick = tc.tick;
-          uspq = tc.usPerQuarter;
-        }
-        ms += ((targetTick - prevTick) / ticksPerQuarter) * (uspq / 1000);
-        return ms;
-      }
-
-      rawEvents.sort((a, b) => a.tick - b.tick);
-
-      const events = rawEvents.map(ev => ({
-        baseTimeMs: tickToBaseMs(ev.tick),
-        bytes: ev.bytes,
-        channel: ev.channel,
-        isSysEx: ev.isSysEx
-      }));
-
-      const initialBpm = Math.round(60000000 / cleanTempos[0].usPerQuarter);
-      const durationMs = events.length > 0 ? events[events.length - 1].baseTimeMs : 0;
-
-      return { format, events, initialBpm, durationMs, keySignatureLabel };
+    function setKeyActive(midi, active) {
+      const el = keyElements.get(midi);
+      if (!el) return;
+      el.classList.toggle("active", Boolean(active));
     }
 
+    function clearAllKeys() {
+      keyElements.forEach((el) => el.classList.remove("active"));
+    }
+
+    // =========================================================================
+    // 2. Web MIDI Output & High-Definition MIDI Engine (HiDefMidiPlayer)
+    // =========================================================================
     class HiDefMidiPlayer {
-      constructor(output, events = []) {
-        this.output = output || null;
-        this.events = events;
-        this.lookaheadMs = 100;
-        this.intervalMs = 25;
-        this.tempoScale = 1.0;
-
-        this.cursor = 0;
-        this.pausedBaseMs = 0;
-        this.anchorPerfMs = 0;
-        this.anchorBaseMs = 0;
+      constructor() {
+        this.midiAccess = null;
+        this.midiOutput = null;
+        this.events = [];
+        this.durationSec = 0;
         this.isPlaying = false;
-        this.timer = null;
-        this.activeChannels = new Set();
+        this.tempoScale = 1.0;
+        this.songTimeSec = 0;
+        this.lastPerfMs = null;
+        this.nextEventIdx = 0;
+        this.lookaheadSec = 0.08;
+        this.rafId = null;
+        this.onProgress = null;
       }
 
-      setOutput(output) {
-        this.panicReset();
-        this.output = output || null;
+      async initWebMidi() {
+        const selectEl = document.getElementById("midi-out-select");
+        if (!navigator.requestMIDIAccess) {
+          selectEl.innerHTML = `<option value="">Web MIDI Unsupported</option>`;
+          return;
+        }
+        try {
+          this.midiAccess = await navigator.requestMIDIAccess({ sysex: true });
+          const refreshOutputs = () => {
+            const outputs = Array.from(this.midiAccess.outputs.values());
+            selectEl.innerHTML = `<option value="">-- Internal Visual Only --</option>`;
+            outputs.forEach((port) => {
+              const opt = document.createElement("option");
+              opt.value = port.id;
+              opt.textContent = port.name || `MIDI Out (${port.id})`;
+              selectEl.appendChild(opt);
+            });
+            if (outputs.length > 0 && !this.midiOutput) {
+              this.midiOutput = outputs[0];
+              selectEl.value = outputs[0].id;
+            }
+          };
+          refreshOutputs();
+          this.midiAccess.onstatechange = refreshOutputs;
+          selectEl.addEventListener("change", () => {
+            this.midiOutput = this.midiAccess.outputs.get(selectEl.value) || null;
+            this.sendPanicReset();
+          });
+        } catch {
+          selectEl.innerHTML = `<option value="">Web MIDI Blocked/Unavailable</option>`;
+        }
       }
 
-      setEvents(events) {
-        this.stop();
-        this.events = Array.isArray(events) ? events : [];
-        this.activeChannels.clear();
-        for (const ev of this.events) {
-          if (typeof ev.channel === 'number') {
-            this.activeChannels.add(ev.channel);
+      sendRaw(bytes, timestampMs = performance.now()) {
+        if (!this.midiOutput || !bytes || !bytes.length) return;
+        try {
+          this.midiOutput.send(bytes, timestampMs);
+        } catch {
+          // Ignore transient output errors
+        }
+      }
+
+      sendPanicReset() {
+        for (let ch = 0; ch < 16; ch++) {
+          this.sendRaw([0xB0 | ch, 121, 0]); // CC#121 Reset All Controllers
+          this.sendRaw([0xB0 | ch, 123, 0]); // CC#123 All Notes Off
+          this.sendRaw([0xB0 | ch, 64, 0]);  // Sustain off
+          this.sendRaw([0xB0 | ch, 66, 0]);  // Sostenuto off
+          this.sendRaw([0xB0 | ch, 67, 0]);  // Soft pedal off
+        }
+        clearAllKeys();
+      }
+
+      // Standard MIDI File (.mid) parser with tempo, multi-channel, CC#64/66/67/88, and SysEx
+      parseStandardMidi(arrayBuffer) {
+        const view = new DataView(arrayBuffer);
+        let pos = 0;
+
+        const readStr = (len) => {
+          let s = "";
+          for (let i = 0; i < len; i++) s += String.fromCharCode(view.getUint8(pos++));
+          return s;
+        };
+        const readU32 = () => {
+          const v = view.getUint32(pos);
+          pos += 4;
+          return v;
+        };
+        const readU16 = () => {
+          const v = view.getUint16(pos);
+          pos += 2;
+          return v;
+        };
+        const readVarLen = () => {
+          let value = 0;
+          let b;
+          do {
+            b = view.getUint8(pos++);
+            value = (value << 7) | (b & 0x7F);
+          } while (b & 0x80);
+          return value;
+        };
+
+        if (readStr(4) !== "MThd") throw new Error("Invalid MIDI header");
+        const headerLen = readU32();
+        const format = readU16();
+        const numTracks = readU16();
+        const division = readU16();
+        pos = 8 + headerLen;
+
+        const ticksPerQuarter = (division & 0x8000) ? 480 : division;
+        const rawEvents = [];
+
+        for (let t = 0; t < numTracks; t++) {
+          if (pos + 8 > view.byteLength) break;
+          const chunkId = readStr(4);
+          const chunkLen = readU32();
+          const trackEnd = Math.min(pos + chunkLen, view.byteLength);
+          if (chunkId !== "MTrk") {
+            pos = trackEnd;
+            continue;
+          }
+
+          let absTick = 0;
+          let runningStatus = 0;
+
+          while (pos < trackEnd) {
+            const delta = readVarLen();
+            absTick += delta;
+            let status = view.getUint8(pos);
+
+            if (status < 0x80) {
+              status = runningStatus;
+            } else {
+              pos++;
+              if (status < 0xF0) runningStatus = status;
+            }
+
+            if (status === 0xFF) {
+              const metaType = view.getUint8(pos++);
+              const len = readVarLen();
+              if (metaType === 0x51 && len === 3) {
+                const mpqn = (view.getUint8(pos) << 16) |
+                             (view.getUint8(pos + 1) << 8) |
+                             view.getUint8(pos + 2);
+                rawEvents.push({ tick: absTick, kind: "tempo", mpqn });
+              }
+              pos = Math.min(pos + len, trackEnd);
+            } else if (status === 0xF0 || status === 0xF7) {
+              const len = readVarLen();
+              const sysex = [0xF0];
+              for (let i = 0; i < len && pos < trackEnd; i++) {
+                sysex.push(view.getUint8(pos++));
+              }
+              if (sysex[sysex.length - 1] !== 0xF7) sysex.push(0xF7);
+              rawEvents.push({ tick: absTick, kind: "sysex", bytes: sysex });
+            } else {
+              const msgType = status & 0xF0;
+              const ch = status & 0x0F;
+              const d1 = pos < trackEnd ? view.getUint8(pos++) : 0;
+              const d2 = (msgType !== 0xC0 && msgType !== 0xD0 && pos < trackEnd)
+                ? view.getUint8(pos++)
+                : 0;
+              rawEvents.push({ tick: absTick, kind: "midi", status, msgType, ch, d1, d2 });
+            }
+          }
+          pos = trackEnd;
+        }
+
+        // Convert ticks to seconds using tempo map
+        rawEvents.sort((a, b) => a.tick - b.tick);
+        let currentMpqn = 500000; // 120 BPM default
+        let lastTick = 0;
+        let currentSec = 0;
+        const timedEvents = [];
+
+        for (const ev of rawEvents) {
+          const dtTicks = ev.tick - lastTick;
+          currentSec += (dtTicks * currentMpqn) / (ticksPerQuarter * 1000000);
+          lastTick = ev.tick;
+
+          if (ev.kind === "tempo") {
+            currentMpqn = ev.mpqn;
+          } else {
+            timedEvents.push({ ...ev, timeSec: currentSec });
           }
         }
+
+        this.events = timedEvents;
+        this.durationSec = timedEvents.length ? timedEvents[timedEvents.length - 1].timeSec : 0;
+        this.songTimeSec = 0;
+        this.nextEventIdx = 0;
       }
 
-      getCurrentBaseMs() {
-        if (!this.isPlaying) return this.pausedBaseMs;
-        return this.anchorBaseMs + (performance.now() - this.anchorPerfMs) * this.tempoScale;
-      }
-
-      setTempoScale(scale) {
-        const current = this.getCurrentBaseMs();
-        this.tempoScale = Math.max(0.25, Math.min(2.5, scale || 1.0));
-        this.anchorPerfMs = performance.now();
-        this.anchorBaseMs = current;
-      }
-
-      _findCursorForBaseMs(baseMs) {
-        let idx = 0;
-        while (idx < this.events.length && this.events[idx].baseTimeMs < baseMs) {
-          idx++;
-        }
-        return idx;
+      async loadAndPlay(url) {
+        this.stop();
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`Failed to fetch MIDI: ${res.status}`);
+        const buf = await res.arrayBuffer();
+        this.parseStandardMidi(buf);
+        this.play();
       }
 
       play() {
         if (!this.events.length) return;
-        this.pause(false);
         this.isPlaying = true;
-        this.anchorPerfMs = performance.now();
-        this.anchorBaseMs = this.pausedBaseMs;
-        this.cursor = this._findCursorForBaseMs(this.pausedBaseMs);
-
-        this.scheduleBatch();
-        this.timer = setInterval(() => this.scheduleBatch(), this.intervalMs);
+        this.lastPerfMs = performance.now();
+        this.tickLoop();
       }
 
-      pause(sendPanic = true) {
-        if (this.timer) {
-          clearInterval(this.timer);
-          this.timer = null;
-        }
-        if (this.isPlaying) {
-          this.pausedBaseMs = this.getCurrentBaseMs();
-          this.isPlaying = false;
-        }
-        if (sendPanic) {
-          this.panicReset();
-        }
-      }
-
-      seek(baseMs) {
-        const wasPlaying = this.isPlaying;
-        this.pause(true);
-        const clamped = Math.max(0, baseMs || 0);
-        this.pausedBaseMs = clamped;
-        this.anchorBaseMs = clamped;
-        this.cursor = this._findCursorForBaseMs(clamped);
-        if (wasPlaying) {
-          this.play();
-        }
+      pause() {
+        this.isPlaying = false;
+        this.lastPerfMs = null;
+        if (this.rafId) cancelAnimationFrame(this.rafId);
+        this.sendPanicReset();
       }
 
       stop() {
-        this.pause(true);
-        this.pausedBaseMs = 0;
-        this.anchorBaseMs = 0;
-        this.cursor = 0;
+        this.pause();
+        this.songTimeSec = 0;
+        this.nextEventIdx = 0;
+        if (this.onProgress) this.onProgress(0, this.durationSec);
       }
 
-      panicReset() {
-        if (!this.output) return;
-        const nowTs = performance.now();
-        const channels = this.activeChannels.size > 0
-          ? [...this.activeChannels]
-          : [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
-
-        for (const ch of channels) {
-          const c = ch & 0x0F;
-          try {
-            this.output.send([0xB0 | c, 64, 0], nowTs);
-            this.output.send([0xB0 | c, 121, 0], nowTs);
-            this.output.send([0xB0 | c, 123, 0], nowTs);
-          } catch (e) {}
+      seek(ratio) {
+        const clamped = Math.max(0, Math.min(1, ratio));
+        this.songTimeSec = clamped * this.durationSec;
+        this.sendPanicReset();
+        let idx = 0;
+        while (idx < this.events.length && this.events[idx].timeSec < this.songTimeSec) {
+          idx++;
         }
+        this.nextEventIdx = idx;
+        if (this.onProgress) this.onProgress(this.songTimeSec, this.durationSec);
       }
 
-      scheduleBatch() {
-        if (!this.isPlaying) return;
-        const now = performance.now();
-        const horizon = now + this.lookaheadMs;
-
-        while (this.cursor < this.events.length) {
-          const ev = this.events[this.cursor];
-          const deltaFromAnchorMs = (ev.baseTimeMs - this.anchorBaseMs) / this.tempoScale;
-          const targetTimestamp = this.anchorPerfMs + deltaFromAnchorMs;
-
-          if (targetTimestamp > horizon) break;
-
-          if (this.output) {
-            const safeTs = Math.max(now, targetTimestamp);
-            try {
-              this.output.send(ev.bytes, safeTs);
-            } catch (e) {}
-          }
-          this.cursor++;
-        }
-
-        if (this.cursor >= this.events.length) {
-          clearInterval(this.timer);
-          this.timer = null;
-          this.isPlaying = false;
-          this.pausedBaseMs = 0;
-          this.anchorBaseMs = 0;
-          this.cursor = 0;
-          this.panicReset();
-        }
-      }
-    }
-
-    const midiPlayer = document.getElementById('bachMidiPlayer');
-    const virtualPianoSection = document.getElementById('virtualPianoSection');
-    const nowBwv = document.getElementById('nowBwv');
-    const nowTitle = document.getElementById('nowTitle');
-    const playlistStatusBadge = document.getElementById('playlistStatusBadge');
-    const playPauseBtn = document.getElementById('playPauseBtn');
-    const stopBtn = document.getElementById('stopBtn');
-    const nextTrackBtn = document.getElementById('nextTrackBtn');
-    const shuffleBtn = document.getElementById('shuffleBtn');
-    const tempoSlider = document.getElementById('tempoSlider');
-    const tempoReadout = document.getElementById('tempoReadout');
-    const timeReadout = document.getElementById('timeReadout');
-
-    const midiOutToggle = document.getElementById('midiOutToggle');
-    const midiOutSelect = document.getElementById('midiOutSelect');
-    const midiScanBtn = document.getElementById('midiScanBtn');
-    const midiOutStatus = document.getElementById('midiOutStatus');
-
-    const dynamicsSummary = document.getElementById('dynamicsSummary');
-    const pedalSummary = document.getElementById('pedalSummary');
-    const pedalBadge = document.getElementById('pedalBadge');
-    const tempoKeySummary = document.getElementById('tempoKeySummary');
-
-    const virtualPiano = document.getElementById('virtualPiano');
-    const activeNotesReadout = document.getElementById('activeNotesReadout');
-    const mergedProgressTrack = document.getElementById('mergedProgressTrack');
-    const mergedProgressFill = document.getElementById('mergedProgressFill');
-
-    const spotifyEmbed = document.getElementById('spotifyEmbed');
-    const spotifyCaption = document.getElementById('spotifyCaption');
-    const spotifySearchLink = document.getElementById('spotifySearchLink');
-
-    const musescoreEmbed = document.getElementById('score-iframe');
-    const musescoreCaption = document.getElementById('musescoreCaption');
-    const musescoreSearchLink = document.getElementById('musescoreSearchLink');
-
-    const youtubeEmbed = document.getElementById('youtubeEmbed');
-    const youtubeCaption = document.getElementById('youtubeCaption');
-    const youtubeSearchLink = document.getElementById('youtubeSearchLink');
-
-    const bwvSearch = document.getElementById('bwvSearch');
-    const catalogCount = document.getElementById('catalogCount');
-    const categoryCatalogsContainer = document.getElementById('categoryCatalogsContainer');
-    const playAllArchiveBtn = document.getElementById('playAllArchiveBtn');
-    const shuffleAllArchiveBtn = document.getElementById('shuffleAllArchiveBtn');
-
-    const DEFAULT_MUSESCORE_EMBED = 'https://musescore.com/user/11548381/scores/10173982/embed';
-    const DEFAULT_MUSESCORE_LINK = 'https://musescore.com/user/11548381/scores/10173982/s/7_gs7O';
-
-    const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-    const BLACK_PITCH_CLASSES = new Set([1, 3, 6, 8, 10]);
-    const keyElementsByMidi = new Map();
-
-    let tracks = [];
-    let activePath = '';
-    let baseTempo = 120;
-    let totalDuration = 0;
-    let currentKeySigText = 'C Maj / A Min';
-    let currentTempoNotesText = '120 BPM • —';
-    let pedalEvents = [];
-    let liveTimer = null;
-    let trackLoadTimer = null;
-    let queueAdvanceTimer = null;
-    let manualSynth = null;
-
-    let playlistQueue = [];
-    let playlistIndex = -1;
-    let playlistActive = false;
-    let playlistLabel = '';
-    let shuffleEnabled = false;
-    let manualStopRequested = false;
-    let trackStartedFlag = false;
-    let maxObservedTimeSec = 0;
-
-    let midiAccess = null;
-    let sysexGranted = false;
-    let midiOutputs = new Map();
-    let selectedMidiOutput = null;
-    let midiOutEnabled = false;
-    const hwMidiPlayer = new HiDefMidiPlayer(null, []);
-
-    function shuffleArray(arr) {
-      const copy = [...arr];
-      for (let i = copy.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [copy[i], copy[j]] = [copy[j], copy[i]];
-      }
-      return copy;
-    }
-
-    function updatePlaylistBadge() {
-      if (playlistActive && playlistQueue.length > 0) {
-        const posText = `${Math.max(1, playlistIndex + 1)} of ${playlistQueue.length}`;
-        const shufText = shuffleEnabled ? ' • Shuffle' : '';
-        playlistStatusBadge.textContent = `Playlist: ${playlistLabel} (${posText}${shufText})`;
-      } else {
-        playlistStatusBadge.textContent = 'Single Track Mode';
-      }
-    }
-
-    function startPlaylistQueue(trackList, label, useShuffle = false, scrollToPiano = true) {
-      if (!Array.isArray(trackList) || trackList.length === 0) return;
-      shuffleEnabled = Boolean(useShuffle);
-      shuffleBtn.textContent = shuffleEnabled ? 'Shuffle: ON' : 'Shuffle: OFF';
-      shuffleBtn.classList.toggle('active-toggle', shuffleEnabled);
-
-      playlistActive = true;
-      playlistLabel = label || 'Repertoire Queue';
-      playlistQueue = shuffleEnabled ? shuffleArray(trackList) : [...trackList];
-      playlistIndex = 0;
-      updatePlaylistBadge();
-      selectTrack(playlistQueue[0], true, scrollToPiano, true);
-    }
-
-    function playNextInQueue(scrollToPiano = false) {
-      clearTimeout(queueAdvanceTimer);
-      if (manualStopRequested) return;
-
-      if (!playlistActive || playlistQueue.length === 0) {
-        if (tracks.length === 0) return;
-        const idx = tracks.findIndex(t => t.path === activePath);
-        const nextIdx = idx >= 0 ? (idx + 1) % tracks.length : 0;
-        selectTrack(tracks[nextIdx], true, scrollToPiano, false);
-        return;
-      }
-
-      if (shuffleEnabled && playlistQueue.length > 1) {
-        let randIdx = Math.floor(Math.random() * playlistQueue.length);
-        if (randIdx === playlistIndex) {
-          randIdx = (playlistIndex + 1) % playlistQueue.length;
-        }
-        playlistIndex = randIdx;
-      } else {
-        playlistIndex = (playlistIndex + 1) % playlistQueue.length;
-      }
-
-      updatePlaylistBadge();
-      selectTrack(playlistQueue[playlistIndex], true, scrollToPiano, true);
-    }
-
-    function isPlayerRunning() {
-      return Boolean(midiPlayer.playing || midiPlayer.isPlaying);
-    }
-
-    function setPlayPauseLabel(isPlaying) {
-      playPauseBtn.textContent = isPlaying ? 'Pause' : 'Play';
-      playPauseBtn.classList.toggle('active-toggle', isPlaying);
-    }
-
-    shuffleBtn.addEventListener('click', () => {
-      shuffleEnabled = !shuffleEnabled;
-      shuffleBtn.textContent = shuffleEnabled ? 'Shuffle: ON' : 'Shuffle: OFF';
-      shuffleBtn.classList.toggle('active-toggle', shuffleEnabled);
-      if (playlistActive && playlistQueue.length > 1) {
-        const currentTrack = playlistQueue[playlistIndex];
-        if (shuffleEnabled) {
-          const rest = shuffleArray(playlistQueue.filter((_, i) => i !== playlistIndex));
-          playlistQueue = currentTrack ? [currentTrack, ...rest] : rest;
-          playlistIndex = 0;
-        }
-      }
-      updatePlaylistBadge();
-    });
-
-    nextTrackBtn.addEventListener('click', () => {
-      manualStopRequested = false;
-      playNextInQueue(false);
-    });
-
-    playPauseBtn.addEventListener('click', async () => {
-      clearTimeout(queueAdvanceTimer);
-      manualStopRequested = false;
-      try {
-        if (window.Tone && Tone.context && Tone.context.state !== 'running') {
-          await Tone.start();
-        }
-      } catch (e) {}
-
-      if (isPlayerRunning()) {
-        midiPlayer.pause();
-        hwMidiPlayer.pause(true);
-        setPlayPauseLabel(false);
-      } else {
-        if (!midiPlayer.src && tracks.length > 0) {
-          selectTrack(tracks[0], true, false, false);
+      dispatchEvent(ev, schedulePerfMs) {
+        if (ev.kind === "sysex") {
+          this.sendRaw(ev.bytes, schedulePerfMs);
           return;
         }
-        applyTempoSlider();
-        midiPlayer.start();
-        if (midiOutEnabled && selectedMidiOutput) {
-          hwMidiPlayer.seek((midiPlayer.currentTime || 0) * 1000);
-          hwMidiPlayer.play();
-        }
-        setPlayPauseLabel(true);
-      }
-    });
 
-    function syncHwMidiState() {
-      if (midiOutEnabled && selectedMidiOutput) {
-        hwMidiPlayer.setOutput(selectedMidiOutput);
-        hwMidiPlayer.setTempoScale((parseInt(tempoSlider.value, 10) || 100) / 100);
-        const dur = totalDuration || midiPlayer.noteSequence?.totalTime || 0;
-        const curSec = midiPlayer.currentTime || 0;
-        if (dur > 0 && curSec > 0) {
-          hwMidiPlayer.seek(curSec * 1000);
+        const { status, msgType, ch, d1, d2 } = ev;
+
+        // Note On / Note Off + 88-key visual feedback
+        if (msgType === 0x90 && d2 > 0) {
+          setKeyActive(d1, true);
+          this.sendRaw([status, d1, d2], schedulePerfMs);
+        } else if (msgType === 0x80 || (msgType === 0x90 && d2 === 0)) {
+          setKeyActive(d1, false);
+          this.sendRaw([0x80 | ch, d1, 0], schedulePerfMs);
+        } else if (msgType === 0xB0) {
+          // Supports continuous pedaling (CC#64 Sustain, CC#66 Sostenuto, CC#67 Soft)
+          // and high-resolution velocity (CC#88) alongside standard CCs
+          this.sendRaw([status, d1, d2], schedulePerfMs);
+        } else {
+          this.sendRaw(
+            (msgType === 0xC0 || msgType === 0xD0) ? [status, d1] : [status, d1, d2],
+            schedulePerfMs
+          );
         }
-        if (isPlayerRunning()) {
-          hwMidiPlayer.play();
-        }
-      } else {
-        hwMidiPlayer.pause(true);
-        hwMidiPlayer.setOutput(null);
       }
+
+      tickLoop = () => {
+        if (!this.isPlaying) return;
+        const nowPerf = performance.now();
+        if (this.lastPerfMs !== null) {
+          const elapsedSec = ((nowPerf - this.lastPerfMs) / 1000) * this.tempoScale;
+          this.songTimeSec += elapsedSec;
+        }
+        this.lastPerfMs = nowPerf;
+
+        const horizonSec = this.songTimeSec + this.lookaheadSec;
+        while (
+          this.nextEventIdx < this.events.length &&
+          this.events[this.nextEventIdx].timeSec <= horizonSec
+        ) {
+          const ev = this.events[this.nextEventIdx];
+          const deltaSec = Math.max(0, (ev.timeSec - this.songTimeSec) / this.tempoScale);
+          const targetPerfMs = nowPerf + deltaSec * 1000;
+          this.dispatchEvent(ev, targetPerfMs);
+          this.nextEventIdx++;
+        }
+
+        if (this.onProgress) {
+          this.onProgress(this.songTimeSec, this.durationSec);
+        }
+
+        if (this.nextEventIdx >= this.events.length && this.songTimeSec >= this.durationSec) {
+          this.stop();
+          return;
+        }
+
+        this.rafId = requestAnimationFrame(this.tickLoop);
+      };
     }
 
-    function refreshMidiOutputList() {
-      midiOutputs.clear();
-      const prevId = midiOutSelect.value;
-      midiOutSelect.innerHTML = '';
+    // =========================================================================
+    // 3. Catalog Renderer with BWV Badges, Search, Filter & Sorting
+    // =========================================================================
+    const player = new HiDefMidiPlayer();
+    window.midiPlayer = player;
+    window.playMidiTrack = async (path) => {
+      await player.loadAndPlay(path);
+    };
 
-      if (!midiAccess) {
-        const opt = document.createElement('option');
-        opt.value = '';
-        opt.textContent = 'Web MIDI unavailable in this browser';
-        midiOutSelect.appendChild(opt);
-        midiOutStatus.textContent = 'Use Chrome, Edge, or Brave for hardware/USB MIDI output.';
-        selectedMidiOutput = null;
-        syncHwMidiState();
-        return;
-      }
+    let catalogTracks = [];
+    let activeTrackPath = null;
 
-      const outputs = [...midiAccess.outputs.values()];
-      if (outputs.length === 0) {
-        const opt = document.createElement('option');
-        opt.value = '';
-        opt.textContent = 'No MIDI output devices detected';
-        midiOutSelect.appendChild(opt);
-        midiOutStatus.textContent = `0 ports • SysEx: ${sysexGranted ? 'ON' : 'fallback'}`;
-        selectedMidiOutput = null;
-        syncHwMidiState();
-        return;
-      }
-
-      for (const out of outputs) {
-        midiOutputs.set(out.id, out);
-        const opt = document.createElement('option');
-        opt.value = out.id;
-        opt.textContent = out.manufacturer ? `${out.name} (${out.manufacturer})` : out.name;
-        midiOutSelect.appendChild(opt);
-      }
-
-      if (prevId && midiOutputs.has(prevId)) {
-        midiOutSelect.value = prevId;
-      }
-      selectedMidiOutput = midiOutputs.get(midiOutSelect.value) || outputs[0];
-      midiOutSelect.value = selectedMidiOutput.id;
-      midiOutStatus.textContent = `${outputs.length} port(s) • ${selectedMidiOutput.name} • SysEx: ${sysexGranted ? 'ON' : 'fallback'}`;
-      syncHwMidiState();
+    function getBwvNumeric(item) {
+      const sourceText = `${item.bwv || ""} ${item.title || ""}`;
+      const match = sourceText.match(/BWV[\s\-]*(\d+)/i);
+      return match ? parseInt(match[1], 10) : Number.MAX_SAFE_INTEGER;
     }
 
-    async function initWebMidi() {
-      if (!navigator.requestMIDIAccess) {
-        refreshMidiOutputList();
-        return;
+    function getDisplayBwv(item) {
+      if (item.bwv && /^BWV\s+/i.test(item.bwv.trim())) {
+        return item.bwv.trim().toUpperCase();
       }
-      try {
-        midiAccess = await navigator.requestMIDIAccess({ sysex: true });
-        sysexGranted = true;
-      } catch (err) {
-        try {
-          midiAccess = await navigator.requestMIDIAccess({ sysex: false });
-          sysexGranted = false;
-        } catch (err2) {
-          midiAccess = null;
-          sysexGranted = false;
-        }
-      }
-      if (midiAccess) {
-        midiAccess.onstatechange = () => refreshMidiOutputList();
-      }
-      refreshMidiOutputList();
+      const match = (item.title || "").match(/BWV[\s\-]*(\d+[a-zA-Z0-9]*)/i);
+      return match ? `BWV ${match[1].toUpperCase()}` : "";
     }
 
-    function updateTempoKeyDisplay() {
-      tempoKeySummary.textContent = `${currentTempoNotesText} • ${currentKeySigText}`;
+    function escapeHtml(str) {
+      return String(str || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
     }
-
-    async function loadRawMidiForHardware(url) {
-      if (!url) return;
-      try {
-        const res = await fetch(url);
-        if (!res.ok) return;
-        const buf = await res.arrayBuffer();
-        const parsed = parseStandardMidiFile(buf);
-
-        if (parsed.keySignatureLabel) {
-          currentKeySigText = parsed.keySignatureLabel;
-          updateTempoKeyDisplay();
-        }
-
-        if (parsed.initialBpm && parsed.initialBpm > 0) {
-          baseTempo = parsed.initialBpm;
-          const noteCount = midiPlayer.noteSequence?.notes?.length || 0;
-          currentTempoNotesText = `${Math.round(baseTempo)} BPM • ${noteCount} notes`;
-          updateTempoKeyDisplay();
-          applyTempoSlider();
-        }
-
-        hwMidiPlayer.setEvents(parsed.events);
-        hwMidiPlayer.setTempoScale((parseInt(tempoSlider.value, 10) || 100) / 100);
-        if (midiOutEnabled && selectedMidiOutput && isPlayerRunning()) {
-          hwMidiPlayer.seek((midiPlayer.currentTime || 0) * 1000);
-          hwMidiPlayer.play();
-        }
-      } catch (e) {
-        hwMidiPlayer.setEvents([]);
-      }
-    }
-
-    midiOutToggle.addEventListener('click', async () => {
-      if (!midiAccess && navigator.requestMIDIAccess) {
-        await initWebMidi();
-      }
-      midiOutEnabled = !midiOutEnabled;
-      midiOutToggle.textContent = midiOutEnabled ? 'MIDI Out: ON' : 'MIDI Out: OFF';
-      midiOutToggle.classList.toggle('active-toggle', midiOutEnabled);
-      syncHwMidiState();
-    });
-
-    midiOutSelect.addEventListener('change', () => {
-      selectedMidiOutput = midiOutputs.get(midiOutSelect.value) || null;
-      if (selectedMidiOutput) {
-        midiOutStatus.textContent = `${midiOutputs.size} port(s) • ${selectedMidiOutput.name} • SysEx: ${sysexGranted ? 'ON' : 'fallback'}`;
-      }
-      syncHwMidiState();
-    });
-
-    midiScanBtn.addEventListener('click', () => initWebMidi());
 
     function formatTime(sec) {
-      if (!sec || !isFinite(sec) || sec < 0) return '0:00';
-      const m = Math.floor(sec / 60);
-      const s = Math.floor(sec % 60);
-      return `${m}:${s < 10 ? '0' : ''}${s}`;
-    }
-
-    function midiToNoteName(midi) {
-      const pc = ((midi % 12) + 12) % 12;
-      const octave = Math.floor(midi / 12) - 1;
-      return `${NOTE_NAMES[pc]}${octave}`;
-    }
-
-    async function playManualKey(midi) {
-      const p = Math.max(0, Math.min(127, Math.round(midi)));
-      if (midiOutEnabled && selectedMidiOutput) {
-        const ts = performance.now();
-        try {
-          selectedMidiOutput.send([0x90, p, 96], ts);
-          selectedMidiOutput.send([0x80, p, 0], ts + 220);
-        } catch (e) {}
-      }
-      try {
-        if (window.Tone) {
-          await Tone.start();
-          if (!manualSynth) {
-            manualSynth = new Tone.PolySynth(Tone.Synth, {
-              oscillator: { type: 'triangle' },
-              envelope: { attack: 0.01, decay: 0.25, sustain: 0.2, release: 0.4 }
-            }).toDestination();
-          }
-          manualSynth.triggerAttackRelease(midiToNoteName(p), '8n');
-        }
-      } catch (e) {}
-    }
-
-    function buildVirtualPiano() {
-      const WHITE_WIDTH = 23;
-      let whiteIndex = 0;
-
-      for (let midi = 21; midi <= 108; midi++) {
-        const pc = midi % 12;
-        const isBlack = BLACK_PITCH_CLASSES.has(pc);
-
-        if (!isBlack) {
-          const wKey = document.createElement('div');
-          wKey.className = 'piano-white-key';
-          wKey.dataset.midi = midi;
-          wKey.title = midiToNoteName(midi);
-          wKey.addEventListener('pointerdown', () => {
-            wKey.classList.add('active');
-            playManualKey(midi);
-          });
-          wKey.addEventListener('pointerup', () => wKey.classList.remove('active'));
-          wKey.addEventListener('pointerleave', () => wKey.classList.remove('active'));
-          virtualPiano.appendChild(wKey);
-          keyElementsByMidi.set(midi, wKey);
-          whiteIndex++;
-        } else {
-          const bKey = document.createElement('div');
-          bKey.className = 'piano-black-key';
-          bKey.dataset.midi = midi;
-          bKey.title = midiToNoteName(midi);
-          bKey.style.left = `${(whiteIndex * WHITE_WIDTH) - 7}px`;
-          bKey.addEventListener('pointerdown', (ev) => {
-            ev.stopPropagation();
-            bKey.classList.add('active');
-            playManualKey(midi);
-          });
-          bKey.addEventListener('pointerup', (ev) => {
-            ev.stopPropagation();
-            bKey.classList.remove('active');
-          });
-          bKey.addEventListener('pointerleave', () => bKey.classList.remove('active'));
-          virtualPiano.appendChild(bKey);
-          keyElementsByMidi.set(midi, bKey);
-        }
-      }
-    }
-
-    function clearPianoHighlights() {
-      for (const el of keyElementsByMidi.values()) {
-        el.classList.remove('active');
-      }
-      activeNotesReadout.textContent = 'Active Notes: —';
-    }
-
-    function handleNaturalTrackCompletion() {
-      trackStartedFlag = false;
-      maxObservedTimeSec = 0;
-      clearInterval(liveTimer);
-      clearPianoHighlights();
-      pedalBadge.textContent = 'UP';
-      pedalBadge.classList.remove('down');
-      setPlayPauseLabel(false);
-      mergedProgressFill.style.width = '100%';
-
-      if (playlistActive && !manualStopRequested) {
-        clearTimeout(queueAdvanceTimer);
-        queueAdvanceTimer = setTimeout(() => {
-          playNextInQueue(false);
-        }, 500);
-      }
-    }
-
-    function syncProgressAndPiano() {
-      const ns = midiPlayer.noteSequence;
-      const t = midiPlayer.currentTime || 0;
-      const dur = totalDuration || ns?.totalTime || 0;
-      const running = isPlayerRunning();
-
-      if (t > maxObservedTimeSec) {
-        maxObservedTimeSec = t;
-      }
-      if (t > 0.25) {
-        trackStartedFlag = true;
-      }
-
-      const pct = dur > 0 ? Math.min(100, Math.max(0, (t / dur) * 100)) : 0;
-      mergedProgressFill.style.width = `${pct}%`;
-      timeReadout.textContent = `${formatTime(t)} / ${formatTime(dur)}`;
-
-      if (trackStartedFlag && !manualStopRequested && dur > 0.5) {
-        const atEnd = (t >= dur - 0.12) || (!running && maxObservedTimeSec >= dur - 0.5);
-        if (atEnd) {
-          try { midiPlayer.stop(); } catch (e) {}
-          handleNaturalTrackCompletion();
-          return;
-        }
-      }
-
-      const activePitches = new Set();
-      if (ns && Array.isArray(ns.notes)) {
-        for (const n of ns.notes) {
-          const start = n.startTime ?? 0;
-          const end = n.endTime ?? (start + 0.15);
-          if (t >= start && t <= end) {
-            activePitches.add(n.pitch);
-          }
-        }
-      }
-
-      for (const [midi, el] of keyElementsByMidi.entries()) {
-        el.classList.toggle('active', activePitches.has(midi));
-      }
-
-      if (activePitches.size > 0) {
-        const names = [...activePitches].sort((a, b) => a - b).map(midiToNoteName);
-        activeNotesReadout.textContent = `Active Notes: ${names.join(' ')}`;
-      } else {
-        activeNotesReadout.textContent = 'Active Notes: —';
-      }
-
-      let isDown = false;
-      for (const ev of pedalEvents) {
-        if (ev.time <= t) isDown = ev.isDown;
-        else break;
-      }
-      pedalBadge.textContent = isDown ? 'PEDAL DOWN' : 'UP';
-      pedalBadge.classList.toggle('down', isDown);
-    }
-
-    mergedProgressTrack.addEventListener('click', (ev) => {
-      const dur = totalDuration || midiPlayer.noteSequence?.totalTime || 0;
-      if (!dur) return;
-      const rect = mergedProgressTrack.getBoundingClientRect();
-      const ratio = Math.min(1, Math.max(0, (ev.clientX - rect.left) / rect.width));
-      const targetTime = ratio * dur;
-      if (typeof midiPlayer.seek === 'function') {
-        midiPlayer.seek(targetTime);
-      } else {
-        midiPlayer.currentTime = targetTime;
-      }
-      hwMidiPlayer.seek(targetTime * 1000);
-      syncProgressAndPiano();
-    });
-
-    function velocityToDynamic(v) {
-      if (v < 35) return 'pp';
-      if (v < 55) return 'p';
-      if (v < 75) return 'mp';
-      if (v < 95) return 'mf';
-      if (v < 115) return 'f';
-      return 'ff';
-    }
-
-    function extractPedalEvents(ns) {
-      const evs = [];
-      const ccs = ns?.controlChanges || [];
-      for (const cc of ccs) {
-        if (cc.controlId === 64 || cc.controlNumber === 64) {
-          const t = cc.time ?? 0;
-          const val = cc.controlValue ?? cc.value ?? 0;
-          evs.push({ time: t, isDown: val >= 64 });
-        }
-      }
-      evs.sort((a, b) => a.time - b.time);
-      return evs;
-    }
-
-    function applyTempoSlider() {
-      const pct = parseInt(tempoSlider.value, 10) || 100;
-      const factor = pct / 100;
-      const targetQpm = Math.max(20, Math.round(baseTempo * factor));
-      tempoReadout.textContent = `${pct}% (${targetQpm} BPM)`;
-
-      hwMidiPlayer.setTempoScale(factor);
-
-      if (typeof midiPlayer.setTempo === 'function') {
-        midiPlayer.setTempo(targetQpm);
-      }
-      if (midiPlayer.player && typeof midiPlayer.player.setTempo === 'function') {
-        midiPlayer.player.setTempo(targetQpm);
-      }
-    }
-
-    function analyzeSequence() {
-      const ns = midiPlayer.noteSequence;
-      if (!ns) return;
-
-      const seqBpm = ns.tempos?.[0]?.qpm;
-      if (seqBpm && seqBpm > 0) {
-        baseTempo = seqBpm;
-      }
-
-      totalDuration = ns.totalTime || 0;
-      const notes = ns.notes || [];
-      const velocities = notes.map(n => n.velocity).filter(v => typeof v === 'number' && v > 0);
-
-      if (velocities.length > 0) {
-        const minV = Math.min(...velocities);
-        const maxV = Math.max(...velocities);
-        dynamicsSummary.textContent = `${velocityToDynamic(minV)}–${velocityToDynamic(maxV)} (${minV}–${maxV})`;
-      } else {
-        dynamicsSummary.textContent = 'f–f (102)';
-      }
-
-      if (Array.isArray(ns.keySignatures) && ns.keySignatures.length > 0) {
-        const ks = ns.keySignatures[0];
-        const sf = typeof ks.key === 'number' ? ks.key : 0;
-        const isMinor = ks.mode === 1 || ks.mode === 'MINOR';
-        currentKeySigText = formatKeySignature(sf, isMinor);
-      } else if (!currentKeySigText || currentKeySigText === '—') {
-        currentKeySigText = 'C Maj / A Min';
-      }
-
-      currentTempoNotesText = `${Math.round(baseTempo)} BPM • ${notes.length} notes`;
-      updateTempoKeyDisplay();
-
-      pedalEvents = extractPedalEvents(ns);
-      const downCount = pedalEvents.filter(e => e.isDown).length;
-      pedalSummary.textContent = pedalEvents.length > 0
-        ? `${downCount} presses`
-        : 'Continuous';
-
-      timeReadout.textContent = `0:00 / ${formatTime(totalDuration)}`;
-      mergedProgressFill.style.width = '0%';
-
-      applyTempoSlider();
-    }
-
-    buildVirtualPiano();
-    initWebMidi();
-
-    tempoSlider.addEventListener('input', applyTempoSlider);
-    tempoSlider.addEventListener('change', applyTempoSlider);
-
-    midiPlayer.addEventListener('load', analyzeSequence);
-    midiPlayer.addEventListener('start', () => {
-      clearTimeout(queueAdvanceTimer);
-      manualStopRequested = false;
-      setPlayPauseLabel(true);
-      applyTempoSlider();
-      if (midiOutEnabled && selectedMidiOutput) {
-        hwMidiPlayer.seek((midiPlayer.currentTime || 0) * 1000);
-        hwMidiPlayer.play();
-      }
-      clearInterval(liveTimer);
-      liveTimer = setInterval(syncProgressAndPiano, 50);
-    });
-    midiPlayer.addEventListener('pause', () => {
-      clearInterval(liveTimer);
-      setPlayPauseLabel(false);
-      hwMidiPlayer.pause(true);
-      pedalBadge.textContent = 'UP';
-      pedalBadge.classList.remove('down');
-      clearPianoHighlights();
-    });
-    midiPlayer.addEventListener('stop', () => {
-      clearInterval(liveTimer);
-      setPlayPauseLabel(false);
-      hwMidiPlayer.stop();
-      pedalBadge.textContent = 'UP';
-      pedalBadge.classList.remove('down');
-      clearPianoHighlights();
-
-      const dur = totalDuration || midiPlayer.noteSequence?.totalTime || 0;
-      const finishedNaturally =
-        trackStartedFlag &&
-        !manualStopRequested &&
-        dur > 0.5 &&
-        maxObservedTimeSec >= dur - 0.5;
-
-      if (finishedNaturally) {
-        handleNaturalTrackCompletion();
-      } else {
-        trackStartedFlag = false;
-        maxObservedTimeSec = 0;
-        mergedProgressFill.style.width = '0%';
-        timeReadout.textContent = `0:00 / ${formatTime(dur)}`;
-      }
-    });
-    stopBtn.addEventListener('click', () => {
-      clearTimeout(queueAdvanceTimer);
-      manualStopRequested = true;
-      trackStartedFlag = false;
-      maxObservedTimeSec = 0;
-      midiPlayer.stop();
-      hwMidiPlayer.stop();
-      setPlayPauseLabel(false);
-    });
-
-    function syncCompanions(track) {
-      const q = encodeURIComponent(`${track.category || 'Classical'} ${track.bwv || ''} ${track.title || ''} piano`);
-      spotifySearchLink.href = `https://open.spotify.com/search/${q}`;
-      spotifyEmbed.src = `https://open.spotify.com/embed/artist/5aIqB5nVVvmFsvSdExz408?utm_source=generator&theme=0`;
-      spotifyCaption.textContent = `Recordings on Spotify — search "${track.bwv || ''} ${track.title}" for piano interpretations.`;
-
-      musescoreSearchLink.href = `https://musescore.com/sheetmusic?text=${encodeURIComponent((track.category || '') + ' ' + (track.bwv || '') + ' ' + (track.title || ''))}`;
-      musescoreEmbed.src = DEFAULT_MUSESCORE_EMBED;
-      musescoreCaption.innerHTML = `<a href="${DEFAULT_MUSESCORE_LINK}" target="_blank" rel="noopener" style="color:var(--gold-bright);">J. S. Bach 15 2 Part Inventions BWV 772–786</a> by <a href="https://musescore.com/user/11548381" target="_blank" rel="noopener" style="color:var(--parchment);">Marc Nongmaithem</a>`;
-
-      youtubeSearchLink.href = `https://www.youtube.com/results?search_query=${q}`;
-      youtubeCaption.textContent = `Compare competition MIDI dynamics & pedal phrasing against live piano performances.`;
-    }
-
-    function selectTrack(track, autoPlay = true, scrollToPiano = false, keepPlaylist = false) {
-      if (!track || !track.path) return;
-
-      if (!keepPlaylist) {
-        playlistActive = false;
-        playlistQueue = [];
-        playlistIndex = -1;
-      }
-      updatePlaylistBadge();
-
-      if (scrollToPiano && virtualPianoSection) {
-        virtualPianoSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
-
-      clearTimeout(trackLoadTimer);
-      clearTimeout(queueAdvanceTimer);
-      clearInterval(liveTimer);
-      manualStopRequested = false;
-      trackStartedFlag = false;
-      maxObservedTimeSec = 0;
-      hwMidiPlayer.stop();
-      clearPianoHighlights();
-
-      activePath = track.path;
-      pedalEvents = [];
-      totalDuration = 0;
-      currentKeySigText = '—';
-      currentTempoNotesText = 'Loading BPM…';
-      updateTempoKeyDisplay();
-      mergedProgressFill.style.width = '0%';
-      timeReadout.textContent = '0:00 / 0:00';
-
-      nowBwv.textContent = `${track.category || 'Classical MIDI'} • ${track.bwv || ''}`;
-      nowTitle.textContent = track.title || track.path;
-      syncCompanions(track);
-      renderCatalog();
-
-      try {
-        midiPlayer.stop();
-      } catch (e) {}
-
-      loadRawMidiForHardware(track.path);
-
-      let started = false;
-      const onTrackLoaded = () => {
-        clearTimeout(trackLoadTimer);
-        analyzeSequence();
-        setTimeout(() => {
-          analyzeSequence();
-          applyTempoSlider();
-        }, 120);
-        if (autoPlay && !started) {
-          started = true;
-          setTimeout(() => {
-            try {
-              if (window.Tone && Tone.context && Tone.context.state !== 'running') {
-                Tone.start().catch(() => {});
-              }
-              midiPlayer.start();
-              setPlayPauseLabel(true);
-            } catch (e) {}
-          }, 140);
-        }
-      };
-
-      midiPlayer.addEventListener('load', onTrackLoaded, { once: true });
-      midiPlayer.src = track.path;
-
-      if (autoPlay) {
-        trackLoadTimer = setTimeout(() => {
-          if (!started) {
-            started = true;
-            analyzeSequence();
-            applyTempoSlider();
-            try {
-              midiPlayer.start();
-              setPlayPauseLabel(true);
-            } catch (e) {}
-          }
-        }, 800);
-      }
-    }
-
-    function getFolderFromPath(path) {
-      if (!path) return 'midi';
-      const parts = path.split('/');
-      parts.pop();
-      return parts.join('/') || 'midi';
+      if (!Number.isFinite(sec) || sec < 0) return "00:00";
+      const s = Math.floor(sec);
+      const m = Math.floor(s / 60);
+      const rem = s % 60;
+      return `${String(m).padStart(2, "0")}:${String(rem).padStart(2, "0")}`;
     }
 
     function renderCatalog() {
-      const q = bwvSearch.value.toLowerCase().trim();
-      const filtered = tracks.filter(t =>
-        !q || `${t.bwv || ''} ${t.title || ''} ${t.category || ''} ${t.path || ''}`.toLowerCase().includes(q)
-      );
+      const query = document.getElementById("search-input").value.trim().toLowerCase();
+      const category = document.getElementById("category-filter").value;
+      const sortBy = document.getElementById("sort-select").value;
+      const listEl = document.getElementById("track-list");
 
-      const groupsMap = new Map();
-      for (const t of filtered) {
-        const folder = getFolderFromPath(t.path);
-        const catName = t.category || folder.replace(/^midi\//i, '').toUpperCase() || 'Classical Archive';
-        const groupKey = `${catName}::${folder}`;
-        if (!groupsMap.has(groupKey)) {
-          groupsMap.set(groupKey, { category: catName, folder, items: [] });
-        }
-        groupsMap.get(groupKey).items.push(t);
+      const filtered = catalogTracks
+        .map((item, idx) => ({
+          ...item,
+          _idx: idx,
+          _bwvBadge: getDisplayBwv(item),
+          _bwvNum: getBwvNumeric(item)
+        }))
+        .filter((item) => {
+          const matchesCat = category === "ALL" || item.category === category;
+          if (!matchesCat) return false;
+          if (!query) return true;
+          const haystack = `${item._bwvBadge} ${item.title} ${item.category} ${item.trackNo || ""}`.toLowerCase();
+          return haystack.includes(query);
+        })
+        .sort((a, b) => {
+          if (sortBy === "bwv") {
+            if (a._bwvNum !== b._bwvNum) return a._bwvNum - b._bwvNum;
+            return a._idx - b._idx;
+          }
+          if (sortBy === "title") {
+            return a.title.localeCompare(b.title);
+          }
+          return a._idx - b._idx;
+        });
+
+      if (!filtered.length) {
+        listEl.innerHTML = `<div style="padding:14px; opacity:0.75;">No matching pieces found.</div>`;
+        return;
       }
 
-      const groups = [...groupsMap.values()];
-      catalogCount.textContent = `Showing ${filtered.length} of ${tracks.length} MIDI files across ${groups.length} ${groups.length === 1 ? 'category' : 'categories'}`;
-
-      categoryCatalogsContainer.innerHTML = groups.map((g, gIdx) => `
-        <div class="category-block">
-          <div class="category-header-bar">
-            <div class="category-title-wrap">
-              <h3 class="category-heading">${g.category}</h3>
-              <span class="category-folder-pill">${g.folder} &bull; ${g.items.length} files</span>
-            </div>
-            <div class="playlist-link-group">
-              <a href="#virtualPianoSection" class="playlist-link-btn" data-group-idx="${gIdx}" data-shuffle="0">
-                &#9654; Play Playlist (${g.items.length})
-              </a>
-              <a href="#virtualPianoSection" class="playlist-link-btn" data-group-idx="${gIdx}" data-shuffle="1">
-                &#8644; Shuffle Playlist
-              </a>
-            </div>
-          </div>
-          <div class="catalog-list">
-            ${g.items.map((t, itemIdx) => `
-              <div class="track-row ${t.path === activePath ? 'active' : ''}" data-group-idx="${gIdx}" data-item-idx="${itemIdx}">
-                <div class="track-info">
-                  <span class="bwv-tag">${t.bwv || 'MIDI'}</span>
-                  <span>${t.title || t.path}</span>
-                </div>
-                <a class="pill-link" href="${t.path}" download onclick="event.stopPropagation()">.MID</a>
+      listEl.innerHTML = filtered
+        .map((item) => {
+          const isActive = item.path === activeTrackPath ? "active" : "";
+          const badgeHtml = item._bwvBadge
+            ? `<span class="bwv-badge">${item._bwvBadge}</span>`
+            : "";
+          return `
+            <div class="track-row ${isActive}" data-path="${encodeURI(item.path)}" data-label="${escapeHtml((item._bwvBadge ? item._bwvBadge + " — " : "") + item.title)}">
+              <div>
+                ${badgeHtml}
+                <span>${escapeHtml(item.title)}</span>
               </div>
-            `).join('')}
-          </div>
-        </div>
-      `).join('');
+              <span class="track-meta">${escapeHtml(item.trackNo || "")}</span>
+            </div>
+          `;
+        })
+        .join("");
 
-      document.querySelectorAll('.playlist-link-btn').forEach(btn => {
-        btn.addEventListener('click', (ev) => {
-          ev.preventDefault();
-          const gIdx = parseInt(btn.dataset.groupIdx, 10);
-          const useShuffle = btn.dataset.shuffle === '1';
-          const grp = groups[gIdx];
-          if (grp) {
-            startPlaylistQueue(grp.items, grp.category, useShuffle, true);
-          }
-        });
-      });
-
-      document.querySelectorAll('.track-row').forEach(row => {
-        row.addEventListener('click', () => {
-          const gIdx = parseInt(row.dataset.groupIdx, 10);
-          const itemIdx = parseInt(row.dataset.itemIdx, 10);
-          const grp = groups[gIdx];
-          if (grp && grp.items[itemIdx]) {
-            selectTrack(grp.items[itemIdx], true, true, false);
-          }
+      listEl.querySelectorAll(".track-row").forEach((row) => {
+        row.addEventListener("click", async () => {
+          const decodedPath = decodeURI(row.dataset.path);
+          const label = row.dataset.label;
+          activeTrackPath = decodedPath;
+          document.getElementById("now-playing").textContent = label;
+          renderCatalog();
+          await window.playMidiTrack(decodedPath);
         });
       });
     }
 
-    playAllArchiveBtn.addEventListener('click', () => {
-      if (tracks.length > 0) {
-        startPlaylistQueue(tracks, 'Complete Archive', false, true);
+    // =========================================================================
+    // 4. UI Controls & Initialization
+    // =========================================================================
+    build88KeyPiano();
+    player.initWebMidi();
+
+    player.onProgress = (cur, total) => {
+      const pct = total > 0 ? Math.min(100, (cur / total) * 100) : 0;
+      document.getElementById("progress-fill").style.width = `${pct}%`;
+      document.getElementById("time-readout").textContent = `${formatTime(cur)} / ${formatTime(total)}`;
+    };
+
+    document.getElementById("play-pause-btn").addEventListener("click", () => {
+      if (player.isPlaying) {
+        player.pause();
+      } else if (player.events.length) {
+        player.play();
       }
     });
 
-    shuffleAllArchiveBtn.addEventListener('click', () => {
-      if (tracks.length > 0) {
-        startPlaylistQueue(tracks, 'Complete Archive', true, true);
-      }
+    document.getElementById("stop-btn").addEventListener("click", () => {
+      player.stop();
     });
 
-    async function initArchive() {
+    document.getElementById("panic-btn").addEventListener("click", () => {
+      player.sendPanicReset();
+    });
+
+    document.getElementById("tempo-slider").addEventListener("input", (e) => {
+      const val = parseFloat(e.target.value);
+      player.tempoScale = val;
+      document.getElementById("tempo-value").textContent = `${Math.round(val * 100)}%`;
+    });
+
+    document.getElementById("progress-track").addEventListener("click", (e) => {
+      const rect = e.currentTarget.getBoundingClientRect();
+      const ratio = (e.clientX - rect.left) / rect.width;
+      player.seek(ratio);
+    });
+
+    document.getElementById("search-input").addEventListener("input", renderCatalog);
+    document.getElementById("category-filter").addEventListener("change", renderCatalog);
+    document.getElementById("sort-select").addEventListener("change", renderCatalog);
+
+    (async function bootstrapCatalog() {
       try {
-        const res = await fetch('catalog.json');
-        if (!res.ok) throw new Error('Missing catalog.json');
-        tracks = await res.json();
-      } catch (e) {
-        tracks = [];
+        const res = await fetch("./catalog-bach.json");
+        if (!res.ok) throw new Error("catalog-bach.json not found");
+        catalogTracks = await res.json();
+        renderCatalog();
+      } catch (err) {
+        document.getElementById("track-list").innerHTML =
+          `<div style="padding:14px; color:#f2b880;">Could not load catalog-bach.json (${escapeHtml(err.message)}).</div>`;
       }
-
-      if (tracks.length > 0) {
-        selectTrack(tracks[0], false, false, false);
-      }
-      renderCatalog();
-    }
-
-    bwvSearch.addEventListener('input', renderCatalog);
-    initArchive();
+    })();
   </script>
 </body>
 </html>
