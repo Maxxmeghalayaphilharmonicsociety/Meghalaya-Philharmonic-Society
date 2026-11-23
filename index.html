@@ -866,6 +866,324 @@
   </footer>
 
   <script>
+    /**
+     * Standard MIDI File (.mid) Parser preserving:
+     * - Raw MIDI bytes per channel (0x0..0xF)
+     * - CC#88 High-Resolution Velocity Prefix immediately before Note On/Off
+     * - Continuous CC#64 (Sustain), CC#66 (Sostenuto), CC#67 (Una Corda)
+     * - SysEx (0xF0 ... 0xF7) messages
+     * - Exact tempo map (microseconds per quarter note)
+     */
+    function parseStandardMidiFile(arrayBuffer) {
+      const bytes = new Uint8Array(arrayBuffer);
+      let pos = 0;
+
+      function readStr(len) {
+        const s = String.fromCharCode(...bytes.slice(pos, pos + len));
+        pos += len;
+        return s;
+      }
+      function readU32() {
+        const v = ((bytes[pos] << 24) | (bytes[pos + 1] << 16) | (bytes[pos + 2] << 8) | bytes[pos + 3]) >>> 0;
+        pos += 4;
+        return v;
+      }
+      function readU16() {
+        const v = ((bytes[pos] << 8) | bytes[pos + 1]) >>> 0;
+        pos += 2;
+        return v;
+      }
+      function readVarLen() {
+        let value = 0;
+        let b;
+        do {
+          if (pos >= bytes.length) break;
+          b = bytes[pos++];
+          value = (value << 7) | (b & 0x7F);
+        } while (b & 0x80);
+        return value;
+      }
+
+      if (readStr(4) !== 'MThd') {
+        throw new Error('Invalid MIDI header');
+      }
+      const headerLen = readU32();
+      const format = readU16();
+      const numTracks = readU16();
+      const division = readU16();
+      pos = 8 + headerLen;
+
+      const ticksPerQuarter = (division & 0x8000) ? 480 : (division || 480);
+      const rawEvents = [];
+      const tempoChanges = [{ tick: 0, usPerQuarter: 500000 }];
+
+      for (let t = 0; t < numTracks && pos < bytes.length; t++) {
+        if (pos + 8 > bytes.length) break;
+        const chunkType = readStr(4);
+        const chunkLen = readU32();
+        const chunkEnd = Math.min(bytes.length, pos + chunkLen);
+
+        if (chunkType !== 'MTrk') {
+          pos = chunkEnd;
+          continue;
+        }
+
+        let tick = 0;
+        let runningStatus = 0;
+
+        while (pos < chunkEnd) {
+          const delta = readVarLen();
+          tick += delta;
+          if (pos >= chunkEnd) break;
+
+          let status = bytes[pos];
+          if (status < 0x80) {
+            status = runningStatus;
+          } else {
+            pos++;
+            if (status < 0xF0) {
+              runningStatus = status;
+            }
+          }
+
+          if (status === 0xFF) {
+            const metaType = bytes[pos++] ?? 0;
+            const metaLen = readVarLen();
+            const metaData = bytes.slice(pos, pos + metaLen);
+            pos += metaLen;
+
+            if (metaType === 0x51 && metaLen >= 3) {
+              const uspq = (metaData[0] << 16) | (metaData[1] << 8) | metaData[2];
+              tempoChanges.push({ tick, usPerQuarter: uspq || 500000 });
+            }
+          } else if (status === 0xF0 || status === 0xF7) {
+            const sysexLen = readVarLen();
+            const payload = bytes.slice(pos, pos + sysexLen);
+            pos += sysexLen;
+
+            if (status === 0xF0) {
+              const packet = payload[payload.length - 1] === 0xF7
+                ? [0xF0, ...payload]
+                : [0xF0, ...payload, 0xF7];
+              rawEvents.push({ tick, bytes: packet, channel: null, isSysEx: true });
+            }
+          } else if (status >= 0x80 && status <= 0xEF) {
+            const msgType = status & 0xF0;
+            const channel = status & 0x0F;
+            const d1 = bytes[pos++] ?? 0;
+            const d2 = (msgType === 0xC0 || msgType === 0xD0) ? null : (bytes[pos++] ?? 0);
+            const evBytes = d2 === null ? [status, d1] : [status, d1, d2];
+            rawEvents.push({ tick, bytes: evBytes, channel, isSysEx: false });
+          }
+        }
+        pos = chunkEnd;
+      }
+
+      // Deduplicate & sort tempo changes
+      tempoChanges.sort((a, b) => a.tick - b.tick);
+      const cleanTempos = [];
+      for (const tc of tempoChanges) {
+        if (cleanTempos.length === 0 || cleanTempos[cleanTempos.length - 1].tick !== tc.tick) {
+          cleanTempos.push(tc);
+        } else {
+          cleanTempos[cleanTempos.length - 1] = tc;
+        }
+      }
+
+      // Convert tick timestamps to base milliseconds using tempo map
+      function tickToBaseMs(targetTick) {
+        let ms = 0;
+        let prevTick = 0;
+        let uspq = cleanTempos[0].usPerQuarter;
+
+        for (let i = 1; i < cleanTempos.length; i++) {
+          const tc = cleanTempos[i];
+          if (targetTick <= tc.tick) break;
+          ms += ((tc.tick - prevTick) / ticksPerQuarter) * (uspq / 1000);
+          prevTick = tc.tick;
+          uspq = tc.usPerQuarter;
+        }
+        ms += ((targetTick - prevTick) / ticksPerQuarter) * (uspq / 1000);
+        return ms;
+      }
+
+      // Sort preserving original order on identical ticks (crucial for CC#88 before Note On/Off)
+      rawEvents.sort((a, b) => a.tick - b.tick);
+
+      const events = rawEvents.map(ev => ({
+        baseTimeMs: tickToBaseMs(ev.tick),
+        bytes: ev.bytes,
+        channel: ev.channel,
+        isSysEx: ev.isSysEx
+      }));
+
+      const initialBpm = Math.round(60000000 / cleanTempos[0].usPerQuarter);
+      const durationMs = events.length > 0 ? events[events.length - 1].baseTimeMs : 0;
+
+      return { format, events, initialBpm, durationMs };
+    }
+
+    /**
+     * Jitter-Free Lookahead Web MIDI Hardware Scheduler
+     * - Uses performance.now() with 100ms lookahead and 25ms interval
+     * - Passes exact DOMHighResTimeStamp to output.send(bytes, targetTimestamp)
+     * - Supports tempo scaling (0.5x .. 1.3x), Play, Pause, Seek, Stop, and Panic/Reset
+     */
+    class HiDefMidiPlayer {
+      constructor(output, events = []) {
+        this.output = output || null;
+        this.events = events;
+        this.lookaheadMs = 100;
+        this.intervalMs = 25;
+        this.tempoScale = 1.0;
+
+        this.cursor = 0;
+        this.pausedBaseMs = 0;
+        this.anchorPerfMs = 0;
+        this.anchorBaseMs = 0;
+        this.isPlaying = false;
+        this.timer = null;
+        this.activeChannels = new Set();
+        this.onFinish = null;
+      }
+
+      setOutput(output) {
+        this.panicReset();
+        this.output = output || null;
+      }
+
+      setEvents(events) {
+        this.stop();
+        this.events = Array.isArray(events) ? events : [];
+        this.activeChannels.clear();
+        for (const ev of this.events) {
+          if (typeof ev.channel === 'number') {
+            this.activeChannels.add(ev.channel);
+          }
+        }
+      }
+
+      getCurrentBaseMs() {
+        if (!this.isPlaying) return this.pausedBaseMs;
+        return this.anchorBaseMs + (performance.now() - this.anchorPerfMs) * this.tempoScale;
+      }
+
+      setTempoScale(scale) {
+        const current = this.getCurrentBaseMs();
+        this.tempoScale = Math.max(0.25, Math.min(2.5, scale || 1.0));
+        this.anchorPerfMs = performance.now();
+        this.anchorBaseMs = current;
+      }
+
+      _findCursorForBaseMs(baseMs) {
+        let idx = 0;
+        while (idx < this.events.length && this.events[idx].baseTimeMs < baseMs) {
+          idx++;
+        }
+        return idx;
+      }
+
+      play() {
+        if (!this.events.length) return;
+        this.pause(false);
+        this.isPlaying = true;
+        this.anchorPerfMs = performance.now();
+        this.anchorBaseMs = this.pausedBaseMs;
+        this.cursor = this._findCursorForBaseMs(this.pausedBaseMs);
+
+        this.scheduleBatch();
+        this.timer = setInterval(() => this.scheduleBatch(), this.intervalMs);
+      }
+
+      pause(sendPanic = true) {
+        if (this.timer) {
+          clearInterval(this.timer);
+          this.timer = null;
+        }
+        if (this.isPlaying) {
+          this.pausedBaseMs = this.getCurrentBaseMs();
+          this.isPlaying = false;
+        }
+        if (sendPanic) {
+          this.panicReset();
+        }
+      }
+
+      seek(baseMs) {
+        const wasPlaying = this.isPlaying;
+        this.pause(true);
+        const clamped = Math.max(0, baseMs || 0);
+        this.pausedBaseMs = clamped;
+        this.anchorBaseMs = clamped;
+        this.cursor = this._findCursorForBaseMs(clamped);
+        if (wasPlaying) {
+          this.play();
+        }
+      }
+
+      stop() {
+        this.pause(true);
+        this.pausedBaseMs = 0;
+        this.anchorBaseMs = 0;
+        this.cursor = 0;
+      }
+
+      panicReset() {
+        if (!this.output) return;
+        const nowTs = performance.now();
+        const channels = this.activeChannels.size > 0
+          ? [...this.activeChannels]
+          : [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
+
+        for (const ch of channels) {
+          const c = ch & 0x0F;
+          try {
+            // Sustain Pedal Off (CC#64 = 0)
+            this.output.send([0xB0 | c, 64, 0], nowTs);
+            // Reset All Controllers (CC#121 = 0)
+            this.output.send([0xB0 | c, 121, 0], nowTs);
+            // All Notes Off (CC#123 = 0)
+            this.output.send([0xB0 | c, 123, 0], nowTs);
+          } catch (e) {}
+        }
+      }
+
+      scheduleBatch() {
+        if (!this.isPlaying) return;
+        const now = performance.now();
+        const horizon = now + this.lookaheadMs;
+
+        while (this.cursor < this.events.length) {
+          const ev = this.events[this.cursor];
+          const deltaFromAnchorMs = (ev.baseTimeMs - this.anchorBaseMs) / this.tempoScale;
+          const targetTimestamp = this.anchorPerfMs + deltaFromAnchorMs;
+
+          if (targetTimestamp > horizon) break;
+
+          if (this.output) {
+            const safeTs = Math.max(now, targetTimestamp);
+            try {
+              this.output.send(ev.bytes, safeTs);
+            } catch (e) {}
+          }
+          this.cursor++;
+        }
+
+        if (this.cursor >= this.events.length) {
+          clearInterval(this.timer);
+          this.timer = null;
+          this.isPlaying = false;
+          this.pausedBaseMs = 0;
+          this.anchorBaseMs = 0;
+          this.cursor = 0;
+          this.panicReset();
+          if (typeof this.onFinish === 'function') {
+            this.onFinish();
+          }
+        }
+      }
+    }
+
     const midiPlayer = document.getElementById('bachMidiPlayer');
     const nowBwv = document.getElementById('nowBwv');
     const nowTitle = document.getElementById('nowTitle');
@@ -922,10 +1240,29 @@
     let manualSynth = null;
 
     let midiAccess = null;
+    let sysexGranted = false;
     let midiOutputs = new Map();
     let selectedMidiOutput = null;
     let midiOutEnabled = false;
-    let previouslyActivePitches = new Set();
+    const hwMidiPlayer = new HiDefMidiPlayer(null, []);
+
+    function syncHwMidiState() {
+      if (midiOutEnabled && selectedMidiOutput) {
+        hwMidiPlayer.setOutput(selectedMidiOutput);
+        hwMidiPlayer.setTempoScale((parseInt(tempoSlider.value, 10) || 100) / 100);
+        const dur = totalDuration || midiPlayer.noteSequence?.totalTime || 0;
+        const curSec = midiPlayer.currentTime || 0;
+        if (dur > 0 && curSec > 0) {
+          hwMidiPlayer.seek(curSec * 1000);
+        }
+        if (midiPlayer.isPlaying) {
+          hwMidiPlayer.play();
+        }
+      } else {
+        hwMidiPlayer.pause(true);
+        hwMidiPlayer.setOutput(null);
+      }
+    }
 
     function refreshMidiOutputList() {
       midiOutputs.clear();
@@ -938,6 +1275,8 @@
         opt.textContent = 'Web MIDI unavailable in this browser';
         midiOutSelect.appendChild(opt);
         midiOutStatus.textContent = 'Use Chrome, Edge, or Brave for hardware/USB MIDI output.';
+        selectedMidiOutput = null;
+        syncHwMidiState();
         return;
       }
 
@@ -947,8 +1286,9 @@
         opt.value = '';
         opt.textContent = 'No MIDI output devices detected';
         midiOutSelect.appendChild(opt);
-        midiOutStatus.textContent = '0 MIDI output ports found.';
+        midiOutStatus.textContent = `0 MIDI output ports found (SysEx: ${sysexGranted ? 'enabled' : 'fallback'}).`;
         selectedMidiOutput = null;
+        syncHwMidiState();
         return;
       }
 
@@ -965,7 +1305,8 @@
       }
       selectedMidiOutput = midiOutputs.get(midiOutSelect.value) || outputs[0];
       midiOutSelect.value = selectedMidiOutput.id;
-      midiOutStatus.textContent = `Detected ${outputs.length} MIDI output(s): ${selectedMidiOutput.name}`;
+      midiOutStatus.textContent = `${outputs.length} port(s) • ${selectedMidiOutput.name} • SysEx: ${sysexGranted ? 'ON' : 'fallback'}`;
+      syncHwMidiState();
     }
 
     async function initWebMidi() {
@@ -974,42 +1315,39 @@
         return;
       }
       try {
-        midiAccess = await navigator.requestMIDIAccess({ sysex: false });
-        midiAccess.onstatechange = () => refreshMidiOutputList();
-        refreshMidiOutputList();
+        midiAccess = await navigator.requestMIDIAccess({ sysex: true });
+        sysexGranted = true;
       } catch (err) {
-        midiAccess = null;
-        refreshMidiOutputList();
+        try {
+          midiAccess = await navigator.requestMIDIAccess({ sysex: false });
+          sysexGranted = false;
+        } catch (err2) {
+          midiAccess = null;
+          sysexGranted = false;
+        }
       }
+      if (midiAccess) {
+        midiAccess.onstatechange = () => refreshMidiOutputList();
+      }
+      refreshMidiOutputList();
     }
 
-    function sendMidiMessage(bytes) {
-      if (!midiOutEnabled || !selectedMidiOutput) return;
+    async function loadRawMidiForHardware(url) {
+      if (!url) return;
       try {
-        selectedMidiOutput.send(bytes);
-      } catch (e) {}
-    }
-
-    function sendMidiNoteOn(pitch, velocity = 90, channel = 0) {
-      const p = Math.max(0, Math.min(127, Math.round(pitch)));
-      const v = Math.max(1, Math.min(127, Math.round(velocity)));
-      const ch = Math.max(0, Math.min(15, channel));
-      sendMidiMessage([0x90 + ch, p, v]);
-    }
-
-    function sendMidiNoteOff(pitch, channel = 0) {
-      const p = Math.max(0, Math.min(127, Math.round(pitch)));
-      const ch = Math.max(0, Math.min(15, channel));
-      sendMidiMessage([0x80 + ch, p, 0]);
-    }
-
-    function sendAllNotesOff(channel = 0) {
-      const ch = Math.max(0, Math.min(15, channel));
-      for (const p of previouslyActivePitches) {
-        sendMidiNoteOff(p, ch);
+        const res = await fetch(url);
+        if (!res.ok) return;
+        const buf = await res.arrayBuffer();
+        const parsed = parseStandardMidiFile(buf);
+        hwMidiPlayer.setEvents(parsed.events);
+        hwMidiPlayer.setTempoScale((parseInt(tempoSlider.value, 10) || 100) / 100);
+        if (midiOutEnabled && selectedMidiOutput && midiPlayer.isPlaying) {
+          hwMidiPlayer.seek((midiPlayer.currentTime || 0) * 1000);
+          hwMidiPlayer.play();
+        }
+      } catch (e) {
+        hwMidiPlayer.setEvents([]);
       }
-      previouslyActivePitches.clear();
-      sendMidiMessage([0xB0 + ch, 123, 0]);
     }
 
     midiOutToggle.addEventListener('click', async () => {
@@ -1019,17 +1357,15 @@
       midiOutEnabled = !midiOutEnabled;
       midiOutToggle.textContent = midiOutEnabled ? 'MIDI Out: ON' : 'MIDI Out: OFF';
       midiOutToggle.classList.toggle('active-toggle', midiOutEnabled);
-      if (!midiOutEnabled) {
-        sendAllNotesOff();
-      }
+      syncHwMidiState();
     });
 
     midiOutSelect.addEventListener('change', () => {
-      sendAllNotesOff();
       selectedMidiOutput = midiOutputs.get(midiOutSelect.value) || null;
       if (selectedMidiOutput) {
-        midiOutStatus.textContent = `Selected output: ${selectedMidiOutput.name}`;
+        midiOutStatus.textContent = `Selected output: ${selectedMidiOutput.name} • SysEx: ${sysexGranted ? 'ON' : 'fallback'}`;
       }
+      syncHwMidiState();
     });
 
     midiScanBtn.addEventListener('click', () => initWebMidi());
@@ -1048,7 +1384,14 @@
     }
 
     async function playManualKey(midi) {
-      sendMidiNoteOn(midi, 96, 0);
+      const p = Math.max(0, Math.min(127, Math.round(midi)));
+      if (midiOutEnabled && selectedMidiOutput) {
+        const ts = performance.now();
+        try {
+          selectedMidiOutput.send([0x90, p, 96], ts);
+          selectedMidiOutput.send([0x80, p, 0], ts + 220);
+        } catch (e) {}
+      }
       try {
         if (window.Tone) {
           await Tone.start();
@@ -1058,10 +1401,9 @@
               envelope: { attack: 0.01, decay: 0.25, sustain: 0.2, release: 0.4 }
             }).toDestination();
           }
-          manualSynth.triggerAttackRelease(midiToNoteName(midi), '8n');
+          manualSynth.triggerAttackRelease(midiToNoteName(p), '8n');
         }
       } catch (e) {}
-      setTimeout(() => sendMidiNoteOff(midi, 0), 220);
     }
 
     function buildVirtualPiano() {
@@ -1113,7 +1455,6 @@
         el.classList.remove('active');
       }
       activeNotesReadout.textContent = 'Active Notes: —';
-      sendAllNotesOff();
     }
 
     function syncProgressAndPiano() {
@@ -1126,29 +1467,14 @@
       timeReadout.textContent = `${formatTime(t)} / ${formatTime(dur)}`;
 
       const activePitches = new Set();
-      const pitchVelocities = new Map();
-
       if (ns && Array.isArray(ns.notes)) {
         for (const n of ns.notes) {
           const start = n.startTime ?? 0;
           const end = n.endTime ?? (start + 0.15);
           if (t >= start && t <= end) {
             activePitches.add(n.pitch);
-            pitchVelocities.set(n.pitch, n.velocity || 90);
           }
         }
-      }
-
-      if (midiOutEnabled && selectedMidiOutput) {
-        for (const p of previouslyActivePitches) {
-          if (!activePitches.has(p)) sendMidiNoteOff(p, 0);
-        }
-        for (const p of activePitches) {
-          if (!previouslyActivePitches.has(p)) {
-            sendMidiNoteOn(p, pitchVelocities.get(p) || 90, 0);
-          }
-        }
-        previouslyActivePitches = activePitches;
       }
 
       for (const [midi, el] of keyElementsByMidi.entries()) {
@@ -1177,12 +1503,12 @@
       const rect = mergedProgressTrack.getBoundingClientRect();
       const ratio = Math.min(1, Math.max(0, (ev.clientX - rect.left) / rect.width));
       const targetTime = ratio * dur;
-      sendAllNotesOff();
       if (typeof midiPlayer.seek === 'function') {
         midiPlayer.seek(targetTime);
       } else {
         midiPlayer.currentTime = targetTime;
       }
+      hwMidiPlayer.seek(targetTime * 1000);
       syncProgressAndPiano();
     });
 
@@ -1214,6 +1540,8 @@
       const factor = pct / 100;
       const targetQpm = Math.max(20, Math.round(baseTempo * factor));
       tempoReadout.textContent = `${pct}% (${targetQpm} BPM)`;
+
+      hwMidiPlayer.setTempoScale(factor);
 
       if (typeof midiPlayer.setTempo === 'function') {
         midiPlayer.setTempo(targetQpm);
@@ -1263,17 +1591,23 @@
     midiPlayer.addEventListener('load', analyzeSequence);
     midiPlayer.addEventListener('start', () => {
       applyTempoSlider();
+      if (midiOutEnabled && selectedMidiOutput) {
+        hwMidiPlayer.seek((midiPlayer.currentTime || 0) * 1000);
+        hwMidiPlayer.play();
+      }
       clearInterval(liveTimer);
       liveTimer = setInterval(syncProgressAndPiano, 50);
     });
     midiPlayer.addEventListener('pause', () => {
       clearInterval(liveTimer);
+      hwMidiPlayer.pause(true);
       pedalBadge.textContent = 'UP';
       pedalBadge.classList.remove('down');
       clearPianoHighlights();
     });
     midiPlayer.addEventListener('stop', () => {
       clearInterval(liveTimer);
+      hwMidiPlayer.stop();
       pedalBadge.textContent = 'UP';
       pedalBadge.classList.remove('down');
       mergedProgressFill.style.width = '0%';
@@ -1282,7 +1616,7 @@
     });
     stopBtn.addEventListener('click', () => {
       midiPlayer.stop();
-      sendAllNotesOff();
+      hwMidiPlayer.stop();
     });
 
     function syncCompanions(track) {
@@ -1304,7 +1638,7 @@
 
       clearTimeout(trackLoadTimer);
       clearInterval(liveTimer);
-      sendAllNotesOff();
+      hwMidiPlayer.stop();
       clearPianoHighlights();
 
       activePath = track.path;
@@ -1321,6 +1655,9 @@
       try {
         midiPlayer.stop();
       } catch (e) {}
+
+      // Fetch raw SMF in parallel for CC#88, continuous CC#64/66/67, multi-channel & SysEx output
+      loadRawMidiForHardware(track.path);
 
       let started = false;
       const onTrackLoaded = () => {
