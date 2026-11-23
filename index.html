@@ -200,7 +200,6 @@
       margin: 0.15rem 0 0;
     }
 
-    /* Hardware MIDI Output Bar */
     .midi-hw-bar {
       display: flex;
       justify-content: space-between;
@@ -259,7 +258,6 @@
       box-shadow: 0 0 10px rgba(229, 193, 88, 0.35);
     }
 
-    /* Compact / Thin Native MIDI Player Bar */
     .compact-player-wrap {
       margin-bottom: 0.9rem;
       padding: 0.2rem 0.5rem;
@@ -275,7 +273,6 @@
       transform-origin: center;
     }
 
-    /* Integrated Tempo Header + Virtual Piano + Thin Merged Progress Bar */
     .virtual-piano-wrap {
       padding: 0.9rem;
       background: rgba(12, 9, 7, 0.88);
@@ -391,7 +388,6 @@
       box-shadow: 0 0 10px rgba(229, 193, 88, 0.55);
     }
 
-    /* Thin Progress Bar Merged Flush With Bottom of Piano */
     .merged-progress-track {
       position: relative;
       width: 100%;
@@ -408,7 +404,6 @@
       transition: width 0.06s linear;
     }
 
-    /* Telemetry Strip Placed Below Virtual Piano */
     .piano-telemetry {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -923,9 +918,9 @@
     let totalDuration = 0;
     let pedalEvents = [];
     let liveTimer = null;
+    let trackLoadTimer = null;
     let manualSynth = null;
 
-    // Web MIDI Output State
     let midiAccess = null;
     let midiOutputs = new Map();
     let selectedMidiOutput = null;
@@ -1305,27 +1300,67 @@
     }
 
     function selectTrack(track, autoPlay = true) {
+      if (!track || !track.path) return;
+
+      clearTimeout(trackLoadTimer);
+      clearInterval(liveTimer);
       sendAllNotesOff();
+      clearPianoHighlights();
+
       activePath = track.path;
       pedalEvents = [];
-      nowBwv.textContent = `${track.category} • ${track.bwv}`;
-      nowTitle.textContent = track.title;
-      midiPlayer.src = track.path;
+      totalDuration = 0;
+      mergedProgressFill.style.width = '0%';
+      timeReadout.textContent = '0:00 / 0:00';
+
+      nowBwv.textContent = `${track.category || 'J.S. Bach'} • ${track.bwv || ''}`;
+      nowTitle.textContent = track.title || track.path;
       syncCompanions(track);
+      renderCatalog();
+
+      try {
+        midiPlayer.stop();
+      } catch (e) {}
+
+      let started = false;
+      const onTrackLoaded = () => {
+        clearTimeout(trackLoadTimer);
+        analyzeSequence();
+        applyTempoSlider();
+        if (autoPlay && !started) {
+          started = true;
+          setTimeout(() => {
+            try {
+              if (window.Tone && Tone.context && Tone.context.state !== 'running') {
+                Tone.start().catch(() => {});
+              }
+              midiPlayer.start();
+            } catch (e) {}
+          }, 40);
+        }
+      };
+
+      midiPlayer.addEventListener('load', onTrackLoaded, { once: true });
+      midiPlayer.src = track.path;
 
       if (autoPlay) {
-        midiPlayer.addEventListener('load', () => {
-          applyTempoSlider();
-          midiPlayer.start();
-        }, { once: true });
+        trackLoadTimer = setTimeout(() => {
+          if (!started) {
+            started = true;
+            analyzeSequence();
+            applyTempoSlider();
+            try {
+              midiPlayer.start();
+            } catch (e) {}
+          }
+        }, 650);
       }
-      renderCatalog();
     }
 
     function renderCatalog() {
       const q = bwvSearch.value.toLowerCase().trim();
       const filtered = tracks.filter(t =>
-        !q || `${t.bwv} ${t.title} ${t.category} ${t.path}`.toLowerCase().includes(q)
+        !q || `${t.bwv || ''} ${t.title || ''} ${t.category || ''} ${t.path || ''}`.toLowerCase().includes(q)
       );
 
       catalogCount.textContent = `Showing ${filtered.length} of ${tracks.length} competition piano MIDI files in midi/bach`;
@@ -1333,9 +1368,9 @@
       catalogList.innerHTML = filtered.map((t, i) => `
         <div class="track-row ${t.path === activePath ? 'active' : ''}" data-idx="${i}">
           <div class="track-info">
-            <span class="bwv-tag">${t.bwv}</span>
-            <span>${t.title}</span>
-            <span class="cat-label">${t.category}</span>
+            <span class="bwv-tag">${t.bwv || 'BWV'}</span>
+            <span>${t.title || t.path}</span>
+            <span class="cat-label">${t.category || ''}</span>
           </div>
           <a class="pill-link" href="${t.path}" download onclick="event.stopPropagation()">.MID</a>
         </div>
