@@ -90,42 +90,29 @@
     header.cathedral-hero {
       position: relative;
       text-align: center;
-      padding: 3.5rem 1.5rem 3rem;
+      padding: 3.2rem 1.5rem 3rem;
       border-bottom: 2px solid var(--gold-dim);
       background: linear-gradient(180deg, rgba(46, 9, 16, 0.55) 0%, rgba(12, 9, 7, 0.96) 100%);
       overflow: hidden;
     }
-    .organ-pipes {
+    .society-logo-wrap {
+      margin: 0 auto 1.25rem;
       display: flex;
       justify-content: center;
-      align-items: flex-end;
-      gap: 5px;
-      height: 110px;
-      margin: 0 auto 1.5rem;
-      max-width: 520px;
-      padding-bottom: 8px;
-      border-bottom: 3px solid var(--gold-antique);
+      align-items: center;
     }
-    .pipe {
-      width: 12px;
-      background: linear-gradient(90deg, #7a5c14 0%, #f1d37a 45%, #8a6918 100%);
-      border-radius: 6px 6px 1px 1px;
-      box-shadow: 0 0 12px rgba(229, 193, 88, 0.25);
-      position: relative;
+    .society-logo {
+      max-height: 128px;
+      max-width: 280px;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      filter: drop-shadow(0 6px 20px rgba(0, 0, 0, 0.8));
+      border-radius: 6px;
     }
-    .pipe::after {
-      content: "";
-      position: absolute;
-      bottom: 10px;
-      left: 2px;
-      right: 2px;
-      height: 6px;
-      background: #2b1d05;
-      border-radius: 1px;
-    }
-    .soli-deo {
+    .music-is-life {
       font-family: 'Cinzel', serif;
-      font-size: 0.82rem;
+      font-size: 0.85rem;
       letter-spacing: 0.28em;
       text-transform: uppercase;
       color: var(--gold-antique);
@@ -196,7 +183,7 @@
       flex-wrap: wrap;
       gap: 1rem;
       padding-bottom: 1rem;
-      margin-bottom: 1.15rem;
+      margin-bottom: 1rem;
       border-bottom: 1px solid var(--gold-dim);
     }
     .now-bwv {
@@ -213,18 +200,49 @@
       margin: 0.15rem 0 0;
     }
 
-    input[type="search"], button.royal-btn {
+    /* Hardware MIDI Output Bar */
+    .midi-hw-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      padding: 0.65rem 0.9rem;
+      margin-bottom: 0.9rem;
+      background: rgba(12, 9, 7, 0.82);
+      border: 1px solid var(--gold-dim);
+      border-radius: 6px;
+    }
+    .midi-hw-group {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      flex-wrap: wrap;
+    }
+    .midi-hw-label {
+      font-family: 'Cinzel', serif;
+      font-size: 0.74rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--gold-antique);
+    }
+    .midi-status-text {
+      font-size: 0.88rem;
+      color: var(--parchment-muted);
+    }
+
+    select, input[type="search"], button.royal-btn {
       background: #120c09;
       color: var(--parchment);
       border: 1px solid var(--gold-antique);
       border-radius: 4px;
-      padding: 0.45rem 0.75rem;
+      padding: 0.42rem 0.7rem;
       font-family: 'EB Garamond', serif;
-      font-size: 1rem;
+      font-size: 0.98rem;
     }
     button.royal-btn {
       font-family: 'Cinzel', serif;
-      font-size: 0.78rem;
+      font-size: 0.76rem;
       letter-spacing: 0.1em;
       text-transform: uppercase;
       cursor: pointer;
@@ -235,6 +253,10 @@
     button.royal-btn:hover {
       border-color: var(--gold-bright);
       box-shadow: 0 0 14px rgba(212, 175, 55, 0.3);
+    }
+    button.royal-btn.active-toggle {
+      border-color: var(--gold-bright);
+      box-shadow: 0 0 10px rgba(229, 193, 88, 0.35);
     }
 
     /* Compact / Thin Native MIDI Player Bar */
@@ -248,8 +270,6 @@
     midi-player {
       width: 100%;
       display: block;
-      --midi-player-padding: 2px 6px;
-      --midi-player-border-radius: 4px;
       height: 36px;
       transform: scaleY(0.85);
       transform-origin: center;
@@ -605,29 +625,16 @@
   </nav>
 
   <header id="top" class="cathedral-hero">
-    <div class="organ-pipes" aria-hidden="true">
-      <div class="pipe" style="height:36px"></div>
-      <div class="pipe" style="height:48px"></div>
-      <div class="pipe" style="height:64px"></div>
-      <div class="pipe" style="height:82px"></div>
-      <div class="pipe" style="height:98px"></div>
-      <div class="pipe" style="height:108px"></div>
-      <div class="pipe" style="height:98px"></div>
-      <div class="pipe" style="height:82px"></div>
-      <div class="pipe" style="height:64px"></div>
-      <div class="pipe" style="height:48px"></div>
-      <div class="pipe" style="height:36px"></div>
-      <div class="pipe" style="height:54px"></div>
-      <div class="pipe" style="height:74px"></div>
-      <div class="pipe" style="height:92px"></div>
-      <div class="pipe" style="height:108px"></div>
-      <div class="pipe" style="height:92px"></div>
-      <div class="pipe" style="height:74px"></div>
-      <div class="pipe" style="height:54px"></div>
-      <div class="pipe" style="height:36px"></div>
+    <div class="society-logo-wrap">
+      <img
+        src="image_d54689.png"
+        alt="Meghalaya Philharmonic Society Emblem"
+        class="society-logo"
+        onerror="this.style.display='none';"
+      >
     </div>
 
-    <div class="soli-deo">Soli Deo Gloria &bull; Shillong, Meghalaya</div>
+    <div class="music-is-life">Music is Life &bull; Musica Est Vita &bull; Shillong, Meghalaya</div>
     <h1 class="palace-title">Meghalaya Philharmonic Society</h1>
     <p class="hero-motto">
       A Baroque sanctuary uniting Johann Sebastian Bach's works with curated competition piano recordings—rich in expressive dynamics and sustain pedal nuance—alongside interactive scores and orchestral training for young musicians in Meghalaya.
@@ -651,6 +658,19 @@
             <h3 id="nowTitle" class="now-title">Select a Piece from the Catalog Below</h3>
           </div>
           <button id="stopBtn" class="royal-btn" type="button">Stop</button>
+        </div>
+
+        <!-- Hardware MIDI Output Detection, Toggle & Instrument Selector -->
+        <div class="midi-hw-bar">
+          <div class="midi-hw-group">
+            <span class="midi-hw-label">MIDI Output:</span>
+            <button id="midiOutToggle" class="royal-btn" type="button">MIDI Out: OFF</button>
+            <select id="midiOutSelect" aria-label="Detected MIDI Output Instrument">
+              <option value="">Scanning MIDI devices...</option>
+            </select>
+            <button id="midiScanBtn" class="royal-btn" type="button">Rescan</button>
+          </div>
+          <span id="midiOutStatus" class="midi-status-text">Checking Web MIDI support...</span>
         </div>
 
         <!-- Compact MIDI Player Bar -->
@@ -859,6 +879,11 @@
     const timeReadout = document.getElementById('timeReadout');
     const stopBtn = document.getElementById('stopBtn');
 
+    const midiOutToggle = document.getElementById('midiOutToggle');
+    const midiOutSelect = document.getElementById('midiOutSelect');
+    const midiScanBtn = document.getElementById('midiScanBtn');
+    const midiOutStatus = document.getElementById('midiOutStatus');
+
     const dynamicRange = document.getElementById('dynamicRange');
     const pedalSummary = document.getElementById('pedalSummary');
     const pedalBadge = document.getElementById('pedalBadge');
@@ -900,6 +925,120 @@
     let liveTimer = null;
     let manualSynth = null;
 
+    // Web MIDI Output State
+    let midiAccess = null;
+    let midiOutputs = new Map();
+    let selectedMidiOutput = null;
+    let midiOutEnabled = false;
+    let previouslyActivePitches = new Set();
+
+    function refreshMidiOutputList() {
+      midiOutputs.clear();
+      const prevId = midiOutSelect.value;
+      midiOutSelect.innerHTML = '';
+
+      if (!midiAccess) {
+        const opt = document.createElement('option');
+        opt.value = '';
+        opt.textContent = 'Web MIDI unavailable in this browser';
+        midiOutSelect.appendChild(opt);
+        midiOutStatus.textContent = 'Use Chrome, Edge, or Brave for hardware/USB MIDI output.';
+        return;
+      }
+
+      const outputs = [...midiAccess.outputs.values()];
+      if (outputs.length === 0) {
+        const opt = document.createElement('option');
+        opt.value = '';
+        opt.textContent = 'No MIDI output devices detected';
+        midiOutSelect.appendChild(opt);
+        midiOutStatus.textContent = '0 MIDI output ports found.';
+        selectedMidiOutput = null;
+        return;
+      }
+
+      for (const out of outputs) {
+        midiOutputs.set(out.id, out);
+        const opt = document.createElement('option');
+        opt.value = out.id;
+        opt.textContent = out.manufacturer ? `${out.name} (${out.manufacturer})` : out.name;
+        midiOutSelect.appendChild(opt);
+      }
+
+      if (prevId && midiOutputs.has(prevId)) {
+        midiOutSelect.value = prevId;
+      }
+      selectedMidiOutput = midiOutputs.get(midiOutSelect.value) || outputs[0];
+      midiOutSelect.value = selectedMidiOutput.id;
+      midiOutStatus.textContent = `Detected ${outputs.length} MIDI output(s): ${selectedMidiOutput.name}`;
+    }
+
+    async function initWebMidi() {
+      if (!navigator.requestMIDIAccess) {
+        refreshMidiOutputList();
+        return;
+      }
+      try {
+        midiAccess = await navigator.requestMIDIAccess({ sysex: false });
+        midiAccess.onstatechange = () => refreshMidiOutputList();
+        refreshMidiOutputList();
+      } catch (err) {
+        midiAccess = null;
+        refreshMidiOutputList();
+      }
+    }
+
+    function sendMidiMessage(bytes) {
+      if (!midiOutEnabled || !selectedMidiOutput) return;
+      try {
+        selectedMidiOutput.send(bytes);
+      } catch (e) {}
+    }
+
+    function sendMidiNoteOn(pitch, velocity = 90, channel = 0) {
+      const p = Math.max(0, Math.min(127, Math.round(pitch)));
+      const v = Math.max(1, Math.min(127, Math.round(velocity)));
+      const ch = Math.max(0, Math.min(15, channel));
+      sendMidiMessage([0x90 + ch, p, v]);
+    }
+
+    function sendMidiNoteOff(pitch, channel = 0) {
+      const p = Math.max(0, Math.min(127, Math.round(pitch)));
+      const ch = Math.max(0, Math.min(15, channel));
+      sendMidiMessage([0x80 + ch, p, 0]);
+    }
+
+    function sendAllNotesOff(channel = 0) {
+      const ch = Math.max(0, Math.min(15, channel));
+      for (const p of previouslyActivePitches) {
+        sendMidiNoteOff(p, ch);
+      }
+      previouslyActivePitches.clear();
+      sendMidiMessage([0xB0 + ch, 123, 0]);
+    }
+
+    midiOutToggle.addEventListener('click', async () => {
+      if (!midiAccess && navigator.requestMIDIAccess) {
+        await initWebMidi();
+      }
+      midiOutEnabled = !midiOutEnabled;
+      midiOutToggle.textContent = midiOutEnabled ? 'MIDI Out: ON' : 'MIDI Out: OFF';
+      midiOutToggle.classList.toggle('active-toggle', midiOutEnabled);
+      if (!midiOutEnabled) {
+        sendAllNotesOff();
+      }
+    });
+
+    midiOutSelect.addEventListener('change', () => {
+      sendAllNotesOff();
+      selectedMidiOutput = midiOutputs.get(midiOutSelect.value) || null;
+      if (selectedMidiOutput) {
+        midiOutStatus.textContent = `Selected output: ${selectedMidiOutput.name}`;
+      }
+    });
+
+    midiScanBtn.addEventListener('click', () => initWebMidi());
+
     function formatTime(sec) {
       if (!sec || !isFinite(sec) || sec < 0) return '0:00';
       const m = Math.floor(sec / 60);
@@ -914,6 +1053,7 @@
     }
 
     async function playManualKey(midi) {
+      sendMidiNoteOn(midi, 96, 0);
       try {
         if (window.Tone) {
           await Tone.start();
@@ -926,6 +1066,7 @@
           manualSynth.triggerAttackRelease(midiToNoteName(midi), '8n');
         }
       } catch (e) {}
+      setTimeout(() => sendMidiNoteOff(midi, 0), 220);
     }
 
     function buildVirtualPiano() {
@@ -977,6 +1118,7 @@
         el.classList.remove('active');
       }
       activeNotesReadout.textContent = 'Active Notes: —';
+      sendAllNotesOff();
     }
 
     function syncProgressAndPiano() {
@@ -989,14 +1131,29 @@
       timeReadout.textContent = `${formatTime(t)} / ${formatTime(dur)}`;
 
       const activePitches = new Set();
+      const pitchVelocities = new Map();
+
       if (ns && Array.isArray(ns.notes)) {
         for (const n of ns.notes) {
           const start = n.startTime ?? 0;
           const end = n.endTime ?? (start + 0.15);
           if (t >= start && t <= end) {
             activePitches.add(n.pitch);
+            pitchVelocities.set(n.pitch, n.velocity || 90);
           }
         }
+      }
+
+      if (midiOutEnabled && selectedMidiOutput) {
+        for (const p of previouslyActivePitches) {
+          if (!activePitches.has(p)) sendMidiNoteOff(p, 0);
+        }
+        for (const p of activePitches) {
+          if (!previouslyActivePitches.has(p)) {
+            sendMidiNoteOn(p, pitchVelocities.get(p) || 90, 0);
+          }
+        }
+        previouslyActivePitches = activePitches;
       }
 
       for (const [midi, el] of keyElementsByMidi.entries()) {
@@ -1025,6 +1182,7 @@
       const rect = mergedProgressTrack.getBoundingClientRect();
       const ratio = Math.min(1, Math.max(0, (ev.clientX - rect.left) / rect.width));
       const targetTime = ratio * dur;
+      sendAllNotesOff();
       if (typeof midiPlayer.seek === 'function') {
         midiPlayer.seek(targetTime);
       } else {
@@ -1102,6 +1260,7 @@
     }
 
     buildVirtualPiano();
+    initWebMidi();
 
     tempoSlider.addEventListener('input', applyTempoSlider);
     tempoSlider.addEventListener('change', applyTempoSlider);
@@ -1126,7 +1285,10 @@
       timeReadout.textContent = `0:00 / ${formatTime(totalDuration)}`;
       clearPianoHighlights();
     });
-    stopBtn.addEventListener('click', () => midiPlayer.stop());
+    stopBtn.addEventListener('click', () => {
+      midiPlayer.stop();
+      sendAllNotesOff();
+    });
 
     function syncCompanions(track) {
       const q = encodeURIComponent(`Johann Sebastian Bach ${track.bwv} ${track.title} piano`);
@@ -1143,6 +1305,7 @@
     }
 
     function selectTrack(track, autoPlay = true) {
+      sendAllNotesOff();
       activePath = track.path;
       pedalEvents = [];
       nowBwv.textContent = `${track.category} • ${track.bwv}`;
