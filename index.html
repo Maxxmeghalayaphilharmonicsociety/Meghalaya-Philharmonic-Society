@@ -177,13 +177,8 @@
     }
 
     .sanctum-now-playing {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 1rem;
-      padding-bottom: 1rem;
-      margin-bottom: 1rem;
+      padding-bottom: 0.9rem;
+      margin-bottom: 0.9rem;
       border-bottom: 1px solid var(--gold-dim);
     }
     .now-bwv {
@@ -198,12 +193,6 @@
       font-size: 1.3rem;
       color: var(--gold-bright);
       margin: 0.15rem 0 0;
-    }
-    .transport-actions {
-      display: flex;
-      align-items: center;
-      gap: 0.45rem;
-      flex-wrap: wrap;
     }
 
     .midi-hw-bar {
@@ -223,6 +212,14 @@
       align-items: center;
       gap: 0.55rem;
       flex-wrap: wrap;
+    }
+    .transport-actions {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding-right: 0.55rem;
+      margin-right: 0.15rem;
+      border-right: 1px solid var(--gold-dim);
     }
     .midi-hw-label {
       font-family: 'Cinzel', serif;
@@ -247,14 +244,14 @@
     }
     button.royal-btn {
       font-family: 'Cinzel', serif;
-      font-size: 0.74rem;
-      letter-spacing: 0.09em;
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
       text-transform: uppercase;
       cursor: pointer;
       background: linear-gradient(180deg, var(--velvet-crimson), var(--velvet-deep));
       color: var(--gold-bright);
       transition: all 0.2s;
-      padding: 0.38rem 0.65rem;
+      padding: 0.34rem 0.58rem;
     }
     button.royal-btn:hover {
       border-color: var(--gold-bright);
@@ -265,7 +262,6 @@
       box-shadow: 0 0 10px rgba(229, 193, 88, 0.35);
     }
 
-    /* Hidden engine player so soundfont audio & timing work without redundant bar UI */
     .hidden-midi-engine {
       position: absolute;
       width: 1px;
@@ -408,7 +404,7 @@
 
     .piano-telemetry {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: 0.85rem;
       margin-top: 1rem;
       padding: 0.85rem 1rem;
@@ -650,20 +646,18 @@
 
       <div class="baroque-frame">
         <div class="sanctum-now-playing">
-          <div>
-            <div id="nowBwv" class="now-bwv">Johann Sebastian Bach &bull; Competition Piano MIDI</div>
-            <h3 id="nowTitle" class="now-title">Select a Piece from the Catalog Below</h3>
-          </div>
-          <div class="transport-actions">
-            <button id="playPauseBtn" class="royal-btn" type="button">Play</button>
-            <button id="stopBtn" class="royal-btn" type="button">Stop</button>
-            <button id="autoNextBtn" class="royal-btn active-toggle" type="button">Auto-Next: ON</button>
-          </div>
+          <div id="nowBwv" class="now-bwv">Johann Sebastian Bach &bull; Competition Piano MIDI</div>
+          <h3 id="nowTitle" class="now-title">Select a Piece from the Catalog Below</h3>
         </div>
 
-        <!-- Hardware MIDI Output Detection, Toggle & Instrument Selector -->
+        <!-- Transport Buttons (Left) + Hardware MIDI Output Detection, Toggle & Instrument Selector -->
         <div class="midi-hw-bar">
           <div class="midi-hw-group">
+            <div class="transport-actions">
+              <button id="playPauseBtn" class="royal-btn" type="button">Play</button>
+              <button id="stopBtn" class="royal-btn" type="button">Stop</button>
+              <button id="autoNextBtn" class="royal-btn active-toggle" type="button">Auto-Next: ON</button>
+            </div>
             <span class="midi-hw-label">MIDI Output:</span>
             <button id="midiOutToggle" class="royal-btn" type="button">MIDI Out: OFF</button>
             <select id="midiOutSelect" aria-label="Detected MIDI Output Instrument">
@@ -710,11 +704,15 @@
           </div>
         </div>
 
-        <!-- Dynamics, Sustain Pedal & Tempo Telemetry Below Virtual Piano -->
+        <!-- Dynamics, Key Signature, Sustain Pedal & Tempo Telemetry Below Virtual Piano -->
         <div class="piano-telemetry">
           <div>
             <span class="telemetry-label">Dynamic Range (MIDI Velocity)</span>
             <span id="dynamicRange" class="telemetry-value">f–f (vel 102–102, avg 102)</span>
+          </div>
+          <div>
+            <span class="telemetry-label">Key Signature</span>
+            <span id="keySignatureValue" class="telemetry-value">—</span>
           </div>
           <div>
             <span class="telemetry-label">Damper / Sustain Pedal (CC 64)</span>
@@ -872,6 +870,30 @@
   </footer>
 
   <script>
+    const MAJOR_BY_FIFTHS = {
+      '-7': 'Cb Major', '-6': 'Gb Major', '-5': 'Db Major', '-4': 'Ab Major',
+      '-3': 'Eb Major', '-2': 'Bb Major', '-1': 'F Major', '0': 'C Major',
+      '1': 'G Major', '2': 'D Major', '3': 'A Major', '4': 'E Major',
+      '5': 'B Major', '6': 'F# Major', '7': 'C# Major'
+    };
+    const MINOR_BY_FIFTHS = {
+      '-7': 'Ab Minor', '-6': 'Eb Minor', '-5': 'Bb Minor', '-4': 'F Minor',
+      '-3': 'C Minor', '-2': 'G Minor', '-1': 'D Minor', '0': 'A Minor',
+      '1': 'E Minor', '2': 'B Minor', '3': 'F# Minor', '4': 'C# Minor',
+      '5': 'G# Minor', '6': 'D# Minor', '7': 'A# Minor'
+    };
+
+    function formatKeySignature(sfSigned, isMinor) {
+      const clamped = Math.max(-7, Math.min(7, sfSigned || 0));
+      const keyStr = isMinor
+        ? (MINOR_BY_FIFTHS[String(clamped)] || 'A Minor')
+        : (MAJOR_BY_FIFTHS[String(clamped)] || 'C Major');
+      if (clamped === 0) return `${keyStr} (0 sharps/flats)`;
+      if (clamped > 0) return `${keyStr} (${clamped} ${clamped === 1 ? 'sharp' : 'sharps'})`;
+      const flats = Math.abs(clamped);
+      return `${keyStr} (${flats} ${flats === 1 ? 'flat' : 'flats'})`;
+    }
+
     function parseStandardMidiFile(arrayBuffer) {
       const bytes = new Uint8Array(arrayBuffer);
       let pos = 0;
@@ -914,6 +936,7 @@
       const ticksPerQuarter = (division & 0x8000) ? 480 : (division || 480);
       const rawEvents = [];
       const tempoChanges = [{ tick: 0, usPerQuarter: 500000 }];
+      let keySignatureLabel = null;
 
       for (let t = 0; t < numTracks && pos < bytes.length; t++) {
         if (pos + 8 > bytes.length) break;
@@ -953,6 +976,10 @@
             if (metaType === 0x51 && metaLen >= 3) {
               const uspq = (metaData[0] << 16) | (metaData[1] << 8) | metaData[2];
               tempoChanges.push({ tick, usPerQuarter: uspq || 500000 });
+            } else if (metaType === 0x59 && metaLen >= 2 && !keySignatureLabel) {
+              const sfSigned = (metaData[0] << 24) >> 24;
+              const isMinor = metaData[1] === 1;
+              keySignatureLabel = formatKeySignature(sfSigned, isMinor);
             }
           } else if (status === 0xF0 || status === 0xF7) {
             const sysexLen = readVarLen();
@@ -1015,7 +1042,7 @@
       const initialBpm = Math.round(60000000 / cleanTempos[0].usPerQuarter);
       const durationMs = events.length > 0 ? events[events.length - 1].baseTimeMs : 0;
 
-      return { format, events, initialBpm, durationMs };
+      return { format, events, initialBpm, durationMs, keySignatureLabel };
     }
 
     class HiDefMidiPlayer {
@@ -1186,6 +1213,7 @@
     const midiOutStatus = document.getElementById('midiOutStatus');
 
     const dynamicRange = document.getElementById('dynamicRange');
+    const keySignatureValue = document.getElementById('keySignatureValue');
     const pedalSummary = document.getElementById('pedalSummary');
     const pedalBadge = document.getElementById('pedalBadge');
     const tempoSummary = document.getElementById('tempoSummary');
@@ -1226,9 +1254,11 @@
     let pedalEvents = [];
     let liveTimer = null;
     let trackLoadTimer = null;
+    let autoNextTimer = null;
     let manualSynth = null;
     let autoNextEnabled = true;
-    let advancingNext = false;
+    let wasPlayingBeforeEnd = false;
+    let manualStopRequested = false;
 
     let midiAccess = null;
     let sysexGranted = false;
@@ -1242,26 +1272,41 @@
       playPauseBtn.classList.toggle('active-toggle', isPlaying);
     }
 
-    function playNextTrack(listContext) {
-      const pool = (Array.isArray(listContext) && listContext.length > 0)
-        ? listContext
-        : (currentFilteredTracks.length > 0 ? currentFilteredTracks : tracks);
-      if (!pool.length) return;
+    function advanceAutoNext() {
+      clearTimeout(autoNextTimer);
+      if (!autoNextEnabled) return;
+      const pool = (currentFilteredTracks.length > 0) ? currentFilteredTracks : tracks;
+      if (!pool || pool.length === 0) return;
 
       const idx = pool.findIndex(t => t.path === activePath);
       const nextTrack = idx >= 0 ? pool[(idx + 1) % pool.length] : pool[0];
-      if (nextTrack) {
-        selectTrack(nextTrack, true, pool);
-      }
+      if (!nextTrack) return;
+
+      autoNextTimer = setTimeout(() => {
+        if (autoNextEnabled) {
+          selectTrack(nextTrack, true, pool);
+        }
+      }, 300);
     }
+
+    hwMidiPlayer.onFinish = () => {
+      if (!manualStopRequested && autoNextEnabled) {
+        advanceAutoNext();
+      }
+    };
 
     autoNextBtn.addEventListener('click', () => {
       autoNextEnabled = !autoNextEnabled;
       autoNextBtn.textContent = autoNextEnabled ? 'Auto-Next: ON' : 'Auto-Next: OFF';
       autoNextBtn.classList.toggle('active-toggle', autoNextEnabled);
+      if (!autoNextEnabled) {
+        clearTimeout(autoNextTimer);
+      }
     });
 
     playPauseBtn.addEventListener('click', async () => {
+      clearTimeout(autoNextTimer);
+      manualStopRequested = false;
       try {
         if (window.Tone && Tone.context && Tone.context.state !== 'running') {
           await Tone.start();
@@ -1269,14 +1314,16 @@
       } catch (e) {}
 
       if (midiPlayer.isPlaying) {
+        wasPlayingBeforeEnd = false;
         midiPlayer.pause();
         hwMidiPlayer.pause(true);
         setPlayPauseLabel(false);
       } else {
         if (!midiPlayer.src && tracks.length > 0) {
-          selectTrack(tracks[0], true);
+          selectTrack(tracks[0], true, tracks);
           return;
         }
+        wasPlayingBeforeEnd = true;
         applyTempoSlider();
         midiPlayer.start();
         if (midiOutEnabled && selectedMidiOutput) {
@@ -1380,6 +1427,9 @@
         if (!res.ok) return;
         const buf = await res.arrayBuffer();
         const parsed = parseStandardMidiFile(buf);
+        if (parsed.keySignatureLabel) {
+          keySignatureValue.textContent = parsed.keySignatureLabel;
+        }
         hwMidiPlayer.setEvents(parsed.events);
         hwMidiPlayer.setTempoScale((parseInt(tempoSlider.value, 10) || 100) / 100);
         if (midiOutEnabled && selectedMidiOutput && midiPlayer.isPlaying) {
@@ -1507,22 +1557,19 @@
       mergedProgressFill.style.width = `${pct}%`;
       timeReadout.textContent = `${formatTime(t)} / ${formatTime(dur)}`;
 
-      // Detect end of track for unattended Auto-Next playback
-      if (dur > 0 && !midiPlayer.isPlaying && t >= dur - 0.15 && !advancingNext) {
-        clearInterval(liveTimer);
-        clearPianoHighlights();
-        pedalBadge.textContent = 'UP';
-        pedalBadge.classList.remove('down');
-        setPlayPauseLabel(false);
-        mergedProgressFill.style.width = '100%';
-        if (autoNextEnabled) {
-          advancingNext = true;
-          setTimeout(() => {
-            advancingNext = false;
-            playNextTrack();
-          }, 350);
+      // If player stopped naturally while playing and we are near end or currentTime reset to 0
+      if (wasPlayingBeforeEnd && !midiPlayer.isPlaying && !manualStopRequested && dur > 0) {
+        if (t >= dur - 0.35 || t <= 0.05) {
+          wasPlayingBeforeEnd = false;
+          clearInterval(liveTimer);
+          clearPianoHighlights();
+          pedalBadge.textContent = 'UP';
+          pedalBadge.classList.remove('down');
+          setPlayPauseLabel(false);
+          mergedProgressFill.style.width = '100%';
+          advanceAutoNext();
+          return;
         }
-        return;
       }
 
       const activePitches = new Set();
@@ -1628,6 +1675,15 @@
         dynamicRange.textContent = 'f–f (vel 102–102, avg 102)';
       }
 
+      if (Array.isArray(ns.keySignatures) && ns.keySignatures.length > 0) {
+        const ks = ns.keySignatures[0];
+        const sf = typeof ks.key === 'number' ? ks.key : 0;
+        const isMinor = ks.mode === 1 || ks.mode === 'MINOR';
+        keySignatureValue.textContent = formatKeySignature(sf, isMinor);
+      } else if (!keySignatureValue.textContent || keySignatureValue.textContent === '—') {
+        keySignatureValue.textContent = 'C Major / A Minor (untagged)';
+      }
+
       pedalEvents = extractPedalEvents(ns);
       const downCount = pedalEvents.filter(e => e.isDown).length;
       pedalSummary.textContent = pedalEvents.length > 0
@@ -1649,7 +1705,9 @@
 
     midiPlayer.addEventListener('load', analyzeSequence);
     midiPlayer.addEventListener('start', () => {
-      advancingNext = false;
+      clearTimeout(autoNextTimer);
+      manualStopRequested = false;
+      wasPlayingBeforeEnd = true;
       setPlayPauseLabel(true);
       applyTempoSlider();
       if (midiOutEnabled && selectedMidiOutput) {
@@ -1668,17 +1726,27 @@
       clearPianoHighlights();
     });
     midiPlayer.addEventListener('stop', () => {
+      const hadActivePlayback = wasPlayingBeforeEnd;
+      wasPlayingBeforeEnd = false;
       clearInterval(liveTimer);
       setPlayPauseLabel(false);
       hwMidiPlayer.stop();
       pedalBadge.textContent = 'UP';
       pedalBadge.classList.remove('down');
-      mergedProgressFill.style.width = '0%';
-      timeReadout.textContent = `0:00 / ${formatTime(totalDuration)}`;
       clearPianoHighlights();
+
+      if (hadActivePlayback && !manualStopRequested && autoNextEnabled) {
+        mergedProgressFill.style.width = '100%';
+        advanceAutoNext();
+      } else {
+        mergedProgressFill.style.width = '0%';
+        timeReadout.textContent = `0:00 / ${formatTime(totalDuration)}`;
+      }
     });
     stopBtn.addEventListener('click', () => {
-      advancingNext = false;
+      clearTimeout(autoNextTimer);
+      manualStopRequested = true;
+      wasPlayingBeforeEnd = false;
       midiPlayer.stop();
       hwMidiPlayer.stop();
       setPlayPauseLabel(false);
@@ -1706,13 +1774,17 @@
       }
 
       clearTimeout(trackLoadTimer);
+      clearTimeout(autoNextTimer);
       clearInterval(liveTimer);
+      manualStopRequested = false;
+      wasPlayingBeforeEnd = false;
       hwMidiPlayer.stop();
       clearPianoHighlights();
 
       activePath = track.path;
       pedalEvents = [];
       totalDuration = 0;
+      keySignatureValue.textContent = '—';
       mergedProgressFill.style.width = '0%';
       timeReadout.textContent = '0:00 / 0:00';
 
@@ -1739,6 +1811,7 @@
               if (window.Tone && Tone.context && Tone.context.state !== 'running') {
                 Tone.start().catch(() => {});
               }
+              wasPlayingBeforeEnd = true;
               midiPlayer.start();
               setPlayPauseLabel(true);
             } catch (e) {}
@@ -1756,6 +1829,7 @@
             analyzeSequence();
             applyTempoSlider();
             try {
+              wasPlayingBeforeEnd = true;
               midiPlayer.start();
               setPlayPauseLabel(true);
             } catch (e) {}
