@@ -200,7 +200,7 @@
       justify-content: space-between;
       align-items: center;
       flex-wrap: wrap;
-      gap: 0.75rem;
+      gap: 0.65rem;
       padding: 0.65rem 0.9rem;
       margin-bottom: 0.9rem;
       background: rgba(12, 9, 7, 0.82);
@@ -210,7 +210,7 @@
     .midi-hw-group {
       display: flex;
       align-items: center;
-      gap: 0.55rem;
+      gap: 0.5rem;
       flex-wrap: wrap;
     }
     .transport-actions {
@@ -218,19 +218,13 @@
       align-items: center;
       gap: 0.4rem;
       padding-right: 0.55rem;
-      margin-right: 0.15rem;
+      margin-right: 0.1rem;
       border-right: 1px solid var(--gold-dim);
-    }
-    .midi-hw-label {
-      font-family: 'Cinzel', serif;
-      font-size: 0.74rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--gold-antique);
     }
     .midi-status-text {
       font-size: 0.88rem;
       color: var(--parchment-muted);
+      margin-left: auto;
     }
 
     select, input[type="search"], button.royal-btn {
@@ -650,7 +644,7 @@
           <h3 id="nowTitle" class="now-title">Select a Piece from the Catalog Below</h3>
         </div>
 
-        <!-- Transport Buttons (Left) + Hardware MIDI Output Detection, Toggle & Instrument Selector -->
+        <!-- Transport Buttons + Hardware MIDI Controls & Inline Status -->
         <div class="midi-hw-bar">
           <div class="midi-hw-group">
             <div class="transport-actions">
@@ -658,7 +652,6 @@
               <button id="stopBtn" class="royal-btn" type="button">Stop</button>
               <button id="autoNextBtn" class="royal-btn active-toggle" type="button">Auto-Next: ON</button>
             </div>
-            <span class="midi-hw-label">MIDI Output:</span>
             <button id="midiOutToggle" class="royal-btn" type="button">MIDI Out: OFF</button>
             <select id="midiOutSelect" aria-label="Detected MIDI Output Instrument">
               <option value="">Scanning MIDI devices...</option>
@@ -1257,7 +1250,8 @@
     let autoNextTimer = null;
     let manualSynth = null;
     let autoNextEnabled = true;
-    let wasPlayingBeforeEnd = false;
+    let hasReachedPlayback = false;
+    let maxObservedTimeSec = 0;
     let manualStopRequested = false;
 
     let midiAccess = null;
@@ -1274,7 +1268,7 @@
 
     function advanceAutoNext() {
       clearTimeout(autoNextTimer);
-      if (!autoNextEnabled) return;
+      if (!autoNextEnabled || manualStopRequested) return;
       const pool = (currentFilteredTracks.length > 0) ? currentFilteredTracks : tracks;
       if (!pool || pool.length === 0) return;
 
@@ -1283,17 +1277,11 @@
       if (!nextTrack) return;
 
       autoNextTimer = setTimeout(() => {
-        if (autoNextEnabled) {
+        if (autoNextEnabled && !manualStopRequested) {
           selectTrack(nextTrack, true, pool);
         }
-      }, 300);
+      }, 400);
     }
-
-    hwMidiPlayer.onFinish = () => {
-      if (!manualStopRequested && autoNextEnabled) {
-        advanceAutoNext();
-      }
-    };
 
     autoNextBtn.addEventListener('click', () => {
       autoNextEnabled = !autoNextEnabled;
@@ -1314,7 +1302,6 @@
       } catch (e) {}
 
       if (midiPlayer.isPlaying) {
-        wasPlayingBeforeEnd = false;
         midiPlayer.pause();
         hwMidiPlayer.pause(true);
         setPlayPauseLabel(false);
@@ -1323,7 +1310,6 @@
           selectTrack(tracks[0], true, tracks);
           return;
         }
-        wasPlayingBeforeEnd = true;
         applyTempoSlider();
         midiPlayer.start();
         if (midiOutEnabled && selectedMidiOutput) {
@@ -1374,7 +1360,7 @@
         opt.value = '';
         opt.textContent = 'No MIDI output devices detected';
         midiOutSelect.appendChild(opt);
-        midiOutStatus.textContent = `0 MIDI output ports found (SysEx: ${sysexGranted ? 'enabled' : 'fallback'}).`;
+        midiOutStatus.textContent = `0 MIDI output ports found • SysEx: ${sysexGranted ? 'ON' : 'fallback'}`;
         selectedMidiOutput = null;
         syncHwMidiState();
         return;
@@ -1454,7 +1440,7 @@
     midiOutSelect.addEventListener('change', () => {
       selectedMidiOutput = midiOutputs.get(midiOutSelect.value) || null;
       if (selectedMidiOutput) {
-        midiOutStatus.textContent = `Selected output: ${selectedMidiOutput.name} • SysEx: ${sysexGranted ? 'ON' : 'fallback'}`;
+        midiOutStatus.textContent = `${midiOutputs.size} port(s) • ${selectedMidiOutput.name} • SysEx: ${sysexGranted ? 'ON' : 'fallback'}`;
       }
       syncHwMidiState();
     });
@@ -1553,23 +1539,36 @@
       const t = midiPlayer.currentTime || 0;
       const dur = totalDuration || ns?.totalTime || 0;
 
+      if (t > maxObservedTimeSec) {
+        maxObservedTimeSec = t;
+      }
+      if (midiPlayer.isPlaying && t > 0.25) {
+        hasReachedPlayback = true;
+      }
+
       const pct = dur > 0 ? Math.min(100, Math.max(0, (t / dur) * 100)) : 0;
       mergedProgressFill.style.width = `${pct}%`;
       timeReadout.textContent = `${formatTime(t)} / ${formatTime(dur)}`;
 
-      // If player stopped naturally while playing and we are near end or currentTime reset to 0
-      if (wasPlayingBeforeEnd && !midiPlayer.isPlaying && !manualStopRequested && dur > 0) {
-        if (t >= dur - 0.35 || t <= 0.05) {
-          wasPlayingBeforeEnd = false;
-          clearInterval(liveTimer);
-          clearPianoHighlights();
-          pedalBadge.textContent = 'UP';
-          pedalBadge.classList.remove('down');
-          setPlayPauseLabel(false);
-          mergedProgressFill.style.width = '100%';
-          advanceAutoNext();
-          return;
-        }
+      // Only advance when playback genuinely progressed and reached the end of the track
+      const reachedEndNaturally =
+        hasReachedPlayback &&
+        !midiPlayer.isPlaying &&
+        !manualStopRequested &&
+        dur > 1.0 &&
+        (maxObservedTimeSec >= dur - 0.75 || t >= dur - 0.75);
+
+      if (reachedEndNaturally) {
+        hasReachedPlayback = false;
+        maxObservedTimeSec = 0;
+        clearInterval(liveTimer);
+        clearPianoHighlights();
+        pedalBadge.textContent = 'UP';
+        pedalBadge.classList.remove('down');
+        setPlayPauseLabel(false);
+        mergedProgressFill.style.width = '100%';
+        advanceAutoNext();
+        return;
       }
 
       const activePitches = new Set();
@@ -1707,7 +1706,6 @@
     midiPlayer.addEventListener('start', () => {
       clearTimeout(autoNextTimer);
       manualStopRequested = false;
-      wasPlayingBeforeEnd = true;
       setPlayPauseLabel(true);
       applyTempoSlider();
       if (midiOutEnabled && selectedMidiOutput) {
@@ -1726,8 +1724,6 @@
       clearPianoHighlights();
     });
     midiPlayer.addEventListener('stop', () => {
-      const hadActivePlayback = wasPlayingBeforeEnd;
-      wasPlayingBeforeEnd = false;
       clearInterval(liveTimer);
       setPlayPauseLabel(false);
       hwMidiPlayer.stop();
@@ -1735,18 +1731,29 @@
       pedalBadge.classList.remove('down');
       clearPianoHighlights();
 
-      if (hadActivePlayback && !manualStopRequested && autoNextEnabled) {
+      const dur = totalDuration || midiPlayer.noteSequence?.totalTime || 0;
+      const finishedNaturally =
+        hasReachedPlayback &&
+        !manualStopRequested &&
+        dur > 1.0 &&
+        maxObservedTimeSec >= dur - 0.75;
+
+      hasReachedPlayback = false;
+      maxObservedTimeSec = 0;
+
+      if (finishedNaturally && autoNextEnabled) {
         mergedProgressFill.style.width = '100%';
         advanceAutoNext();
       } else {
         mergedProgressFill.style.width = '0%';
-        timeReadout.textContent = `0:00 / ${formatTime(totalDuration)}`;
+        timeReadout.textContent = `0:00 / ${formatTime(dur)}`;
       }
     });
     stopBtn.addEventListener('click', () => {
       clearTimeout(autoNextTimer);
       manualStopRequested = true;
-      wasPlayingBeforeEnd = false;
+      hasReachedPlayback = false;
+      maxObservedTimeSec = 0;
       midiPlayer.stop();
       hwMidiPlayer.stop();
       setPlayPauseLabel(false);
@@ -1777,7 +1784,8 @@
       clearTimeout(autoNextTimer);
       clearInterval(liveTimer);
       manualStopRequested = false;
-      wasPlayingBeforeEnd = false;
+      hasReachedPlayback = false;
+      maxObservedTimeSec = 0;
       hwMidiPlayer.stop();
       clearPianoHighlights();
 
@@ -1811,11 +1819,10 @@
               if (window.Tone && Tone.context && Tone.context.state !== 'running') {
                 Tone.start().catch(() => {});
               }
-              wasPlayingBeforeEnd = true;
               midiPlayer.start();
               setPlayPauseLabel(true);
             } catch (e) {}
-          }, 40);
+          }, 80);
         }
       };
 
@@ -1829,12 +1836,11 @@
             analyzeSequence();
             applyTempoSlider();
             try {
-              wasPlayingBeforeEnd = true;
               midiPlayer.start();
               setPlayPauseLabel(true);
             } catch (e) {}
           }
-        }, 650);
+        }, 800);
       }
     }
 
