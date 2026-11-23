@@ -199,6 +199,12 @@
       color: var(--gold-bright);
       margin: 0.15rem 0 0;
     }
+    .transport-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      flex-wrap: wrap;
+    }
 
     .midi-hw-bar {
       display: flex;
@@ -241,13 +247,14 @@
     }
     button.royal-btn {
       font-family: 'Cinzel', serif;
-      font-size: 0.76rem;
-      letter-spacing: 0.1em;
+      font-size: 0.74rem;
+      letter-spacing: 0.09em;
       text-transform: uppercase;
       cursor: pointer;
       background: linear-gradient(180deg, var(--velvet-crimson), var(--velvet-deep));
       color: var(--gold-bright);
       transition: all 0.2s;
+      padding: 0.38rem 0.65rem;
     }
     button.royal-btn:hover {
       border-color: var(--gold-bright);
@@ -258,19 +265,14 @@
       box-shadow: 0 0 10px rgba(229, 193, 88, 0.35);
     }
 
-    .compact-player-wrap {
-      margin-bottom: 0.9rem;
-      padding: 0.2rem 0.5rem;
-      background: rgba(12, 9, 7, 0.72);
-      border: 1px solid var(--gold-dim);
-      border-radius: 6px;
-    }
-    midi-player {
-      width: 100%;
-      display: block;
-      height: 36px;
-      transform: scaleY(0.85);
-      transform-origin: center;
+    /* Hidden engine player so soundfont audio & timing work without redundant bar UI */
+    .hidden-midi-engine {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      opacity: 0;
+      pointer-events: none;
     }
 
     .virtual-piano-wrap {
@@ -652,7 +654,11 @@
             <div id="nowBwv" class="now-bwv">Johann Sebastian Bach &bull; Competition Piano MIDI</div>
             <h3 id="nowTitle" class="now-title">Select a Piece from the Catalog Below</h3>
           </div>
-          <button id="stopBtn" class="royal-btn" type="button">Stop</button>
+          <div class="transport-actions">
+            <button id="playPauseBtn" class="royal-btn" type="button">Play</button>
+            <button id="stopBtn" class="royal-btn" type="button">Stop</button>
+            <button id="autoNextBtn" class="royal-btn active-toggle" type="button">Auto-Next: ON</button>
+          </div>
         </div>
 
         <!-- Hardware MIDI Output Detection, Toggle & Instrument Selector -->
@@ -668,8 +674,8 @@
           <span id="midiOutStatus" class="midi-status-text">Checking Web MIDI support...</span>
         </div>
 
-        <!-- Compact MIDI Player Bar -->
-        <div class="compact-player-wrap">
+        <!-- Off-screen MIDI Engine -->
+        <div class="hidden-midi-engine" aria-hidden="true">
           <midi-player
             id="bachMidiPlayer"
             sound-font="https://storage.googleapis.com/magentadata/js/soundfonts/sgm_plus">
@@ -866,14 +872,6 @@
   </footer>
 
   <script>
-    /**
-     * Standard MIDI File (.mid) Parser preserving:
-     * - Raw MIDI bytes per channel (0x0..0xF)
-     * - CC#88 High-Resolution Velocity Prefix immediately before Note On/Off
-     * - Continuous CC#64 (Sustain), CC#66 (Sostenuto), CC#67 (Una Corda)
-     * - SysEx (0xF0 ... 0xF7) messages
-     * - Exact tempo map (microseconds per quarter note)
-     */
     function parseStandardMidiFile(arrayBuffer) {
       const bytes = new Uint8Array(arrayBuffer);
       let pos = 0;
@@ -979,7 +977,6 @@
         pos = chunkEnd;
       }
 
-      // Deduplicate & sort tempo changes
       tempoChanges.sort((a, b) => a.tick - b.tick);
       const cleanTempos = [];
       for (const tc of tempoChanges) {
@@ -990,7 +987,6 @@
         }
       }
 
-      // Convert tick timestamps to base milliseconds using tempo map
       function tickToBaseMs(targetTick) {
         let ms = 0;
         let prevTick = 0;
@@ -1007,7 +1003,6 @@
         return ms;
       }
 
-      // Sort preserving original order on identical ticks (crucial for CC#88 before Note On/Off)
       rawEvents.sort((a, b) => a.tick - b.tick);
 
       const events = rawEvents.map(ev => ({
@@ -1023,12 +1018,6 @@
       return { format, events, initialBpm, durationMs };
     }
 
-    /**
-     * Jitter-Free Lookahead Web MIDI Hardware Scheduler
-     * - Uses performance.now() with 100ms lookahead and 25ms interval
-     * - Passes exact DOMHighResTimeStamp to output.send(bytes, targetTimestamp)
-     * - Supports tempo scaling (0.5x .. 1.3x), Play, Pause, Seek, Stop, and Panic/Reset
-     */
     class HiDefMidiPlayer {
       constructor(output, events = []) {
         this.output = output || null;
@@ -1138,11 +1127,8 @@
         for (const ch of channels) {
           const c = ch & 0x0F;
           try {
-            // Sustain Pedal Off (CC#64 = 0)
             this.output.send([0xB0 | c, 64, 0], nowTs);
-            // Reset All Controllers (CC#121 = 0)
             this.output.send([0xB0 | c, 121, 0], nowTs);
-            // All Notes Off (CC#123 = 0)
             this.output.send([0xB0 | c, 123, 0], nowTs);
           } catch (e) {}
         }
@@ -1187,10 +1173,12 @@
     const midiPlayer = document.getElementById('bachMidiPlayer');
     const nowBwv = document.getElementById('nowBwv');
     const nowTitle = document.getElementById('nowTitle');
+    const playPauseBtn = document.getElementById('playPauseBtn');
+    const stopBtn = document.getElementById('stopBtn');
+    const autoNextBtn = document.getElementById('autoNextBtn');
     const tempoSlider = document.getElementById('tempoSlider');
     const tempoReadout = document.getElementById('tempoReadout');
     const timeReadout = document.getElementById('timeReadout');
-    const stopBtn = document.getElementById('stopBtn');
 
     const midiOutToggle = document.getElementById('midiOutToggle');
     const midiOutSelect = document.getElementById('midiOutSelect');
@@ -1231,6 +1219,7 @@
     const keyElementsByMidi = new Map();
 
     let tracks = [];
+    let currentFilteredTracks = [];
     let activePath = '';
     let baseTempo = 120;
     let totalDuration = 0;
@@ -1238,6 +1227,8 @@
     let liveTimer = null;
     let trackLoadTimer = null;
     let manualSynth = null;
+    let autoNextEnabled = true;
+    let advancingNext = false;
 
     let midiAccess = null;
     let sysexGranted = false;
@@ -1245,6 +1236,56 @@
     let selectedMidiOutput = null;
     let midiOutEnabled = false;
     const hwMidiPlayer = new HiDefMidiPlayer(null, []);
+
+    function setPlayPauseLabel(isPlaying) {
+      playPauseBtn.textContent = isPlaying ? 'Pause' : 'Play';
+      playPauseBtn.classList.toggle('active-toggle', isPlaying);
+    }
+
+    function playNextTrack(listContext) {
+      const pool = (Array.isArray(listContext) && listContext.length > 0)
+        ? listContext
+        : (currentFilteredTracks.length > 0 ? currentFilteredTracks : tracks);
+      if (!pool.length) return;
+
+      const idx = pool.findIndex(t => t.path === activePath);
+      const nextTrack = idx >= 0 ? pool[(idx + 1) % pool.length] : pool[0];
+      if (nextTrack) {
+        selectTrack(nextTrack, true, pool);
+      }
+    }
+
+    autoNextBtn.addEventListener('click', () => {
+      autoNextEnabled = !autoNextEnabled;
+      autoNextBtn.textContent = autoNextEnabled ? 'Auto-Next: ON' : 'Auto-Next: OFF';
+      autoNextBtn.classList.toggle('active-toggle', autoNextEnabled);
+    });
+
+    playPauseBtn.addEventListener('click', async () => {
+      try {
+        if (window.Tone && Tone.context && Tone.context.state !== 'running') {
+          await Tone.start();
+        }
+      } catch (e) {}
+
+      if (midiPlayer.isPlaying) {
+        midiPlayer.pause();
+        hwMidiPlayer.pause(true);
+        setPlayPauseLabel(false);
+      } else {
+        if (!midiPlayer.src && tracks.length > 0) {
+          selectTrack(tracks[0], true);
+          return;
+        }
+        applyTempoSlider();
+        midiPlayer.start();
+        if (midiOutEnabled && selectedMidiOutput) {
+          hwMidiPlayer.seek((midiPlayer.currentTime || 0) * 1000);
+          hwMidiPlayer.play();
+        }
+        setPlayPauseLabel(true);
+      }
+    });
 
     function syncHwMidiState() {
       if (midiOutEnabled && selectedMidiOutput) {
@@ -1466,6 +1507,24 @@
       mergedProgressFill.style.width = `${pct}%`;
       timeReadout.textContent = `${formatTime(t)} / ${formatTime(dur)}`;
 
+      // Detect end of track for unattended Auto-Next playback
+      if (dur > 0 && !midiPlayer.isPlaying && t >= dur - 0.15 && !advancingNext) {
+        clearInterval(liveTimer);
+        clearPianoHighlights();
+        pedalBadge.textContent = 'UP';
+        pedalBadge.classList.remove('down');
+        setPlayPauseLabel(false);
+        mergedProgressFill.style.width = '100%';
+        if (autoNextEnabled) {
+          advancingNext = true;
+          setTimeout(() => {
+            advancingNext = false;
+            playNextTrack();
+          }, 350);
+        }
+        return;
+      }
+
       const activePitches = new Set();
       if (ns && Array.isArray(ns.notes)) {
         for (const n of ns.notes) {
@@ -1590,6 +1649,8 @@
 
     midiPlayer.addEventListener('load', analyzeSequence);
     midiPlayer.addEventListener('start', () => {
+      advancingNext = false;
+      setPlayPauseLabel(true);
       applyTempoSlider();
       if (midiOutEnabled && selectedMidiOutput) {
         hwMidiPlayer.seek((midiPlayer.currentTime || 0) * 1000);
@@ -1600,6 +1661,7 @@
     });
     midiPlayer.addEventListener('pause', () => {
       clearInterval(liveTimer);
+      setPlayPauseLabel(false);
       hwMidiPlayer.pause(true);
       pedalBadge.textContent = 'UP';
       pedalBadge.classList.remove('down');
@@ -1607,6 +1669,7 @@
     });
     midiPlayer.addEventListener('stop', () => {
       clearInterval(liveTimer);
+      setPlayPauseLabel(false);
       hwMidiPlayer.stop();
       pedalBadge.textContent = 'UP';
       pedalBadge.classList.remove('down');
@@ -1615,8 +1678,10 @@
       clearPianoHighlights();
     });
     stopBtn.addEventListener('click', () => {
+      advancingNext = false;
       midiPlayer.stop();
       hwMidiPlayer.stop();
+      setPlayPauseLabel(false);
     });
 
     function syncCompanions(track) {
@@ -1633,8 +1698,12 @@
       youtubeCaption.textContent = `Compare competition MIDI dynamics & pedal phrasing against live piano performances.`;
     }
 
-    function selectTrack(track, autoPlay = true) {
+    function selectTrack(track, autoPlay = true, listContext = null) {
       if (!track || !track.path) return;
+
+      if (Array.isArray(listContext) && listContext.length > 0) {
+        currentFilteredTracks = listContext;
+      }
 
       clearTimeout(trackLoadTimer);
       clearInterval(liveTimer);
@@ -1656,7 +1725,6 @@
         midiPlayer.stop();
       } catch (e) {}
 
-      // Fetch raw SMF in parallel for CC#88, continuous CC#64/66/67, multi-channel & SysEx output
       loadRawMidiForHardware(track.path);
 
       let started = false;
@@ -1672,6 +1740,7 @@
                 Tone.start().catch(() => {});
               }
               midiPlayer.start();
+              setPlayPauseLabel(true);
             } catch (e) {}
           }, 40);
         }
@@ -1688,6 +1757,7 @@
             applyTempoSlider();
             try {
               midiPlayer.start();
+              setPlayPauseLabel(true);
             } catch (e) {}
           }
         }, 650);
@@ -1699,6 +1769,7 @@
       const filtered = tracks.filter(t =>
         !q || `${t.bwv || ''} ${t.title || ''} ${t.category || ''} ${t.path || ''}`.toLowerCase().includes(q)
       );
+      currentFilteredTracks = filtered.length > 0 ? filtered : tracks;
 
       catalogCount.textContent = `Showing ${filtered.length} of ${tracks.length} competition piano MIDI files in midi/bach`;
 
@@ -1714,7 +1785,7 @@
       `).join('');
 
       document.querySelectorAll('.track-row').forEach((el, idx) => {
-        el.addEventListener('click', () => selectTrack(filtered[idx], true));
+        el.addEventListener('click', () => selectTrack(filtered[idx], true, filtered));
       });
     }
 
@@ -1727,8 +1798,9 @@
         tracks = [];
       }
 
+      currentFilteredTracks = tracks;
       if (tracks.length > 0) {
-        selectTrack(tracks[0], false);
+        selectTrack(tracks[0], false, tracks);
       }
       renderCatalog();
     }
